@@ -238,7 +238,7 @@
 
 		for (var i = 0; i < numpts; i++) {
 			ctx.moveTo(canWidth/2, canHeight/2);
-			var ang = currcirc * i * 2 * Math.PI / numpts;
+			var ang = - currcirc * i * 2 * Math.PI / numpts;
 			ctx.lineTo(canWidth/2 + rad * Math.cos(ang), canHeight/2 + rad * Math.sin(ang));
 		}
 
