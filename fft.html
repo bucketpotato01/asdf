@@ -293,11 +293,11 @@
 <body onload="initall();">
 	<p>
 
-		The Fast Fourier Transform is often used to quickly multiply large polynomials. Brute force is slow, as it takes quadratic time with respect to the size of the polynomial.
+		The Fast Fourier Transform is often used to quickly multiply large polynomials. Brute force multiplication is slow, as it takes quadratic time with respect to the size of the polynomial.
 
 	</p>
 
-	<div>This visualization shows why brute force multiplication takes \(N^2\) time. Here, the red and green squares represent the coefficients of the polynomials being multiplied. A line between a red and a green box means that their coefficients are being multiplied, and the result will be added to the blue box the last line points to.</div>
+	<div>This visualization shows why brute force multiplication takes \(N^2\) time. Here, the red and green squares represent the coefficients of the polynomials being multiplied. To find the product, each term in the red polynomial must be considered with each term in the green polynomial. This comes out to N operations per red term, and there are N red terms, so the brute force multiplication takes \(N^2\) time.</div>
 
 	<div id="canvas-container">
 		
@@ -339,7 +339,7 @@
 
 	<p>
 		
-		If they are evaluated at the same set of points, polynomials in point-value form can be multiplied quickly. However, evaluating polynomials can take as long as brute force. \(n\) points are needed to represent a polynomial (where \(n\) is the degree of the polynomial), and each point takes linear time to evaluate (each x-value must be plugged into the N terms of the polynomial).
+		If they are evaluated at the same set of points, polynomials in point-value form can be multiplied quickly. However, evaluating polynomials can take as long as brute force. \(n\) points are needed to represent a polynomial (where \(n\) is the degree of the polynomial), and each point takes linear time to evaluate (each x-value must be plugged into the N terms of the polynomial, and N x-values must be used).
 
 	</p>
 
@@ -364,7 +364,7 @@
 	</p>
 
 	<div>
-		This visualization shows why \(f_{even}\) and \(f_{odd}\) only need to be evaluated at half as many points. As you square the roots of unity, you can think of them as rotating on the unit circle, and eventually, when they are squared, they end up as half as many points. It's easier to understand this with the animation.
+		This visualization shows why \(f_{even}\) and \(f_{odd}\) only need to be evaluated at half as many points. Squaring the roots of unity causes them to "rotate" around the unit circle, and when they fully roate, two points map to one. The animation makes this more clear.
 	</div>
 
 	<div id="canvas-container">
