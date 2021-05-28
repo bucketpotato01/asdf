@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>FFT</title>
+
+	 <link rel="stylesheet"
+	        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
+	  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
+	  <script>hljs.initHighlightingOnLoad();</script>
+
+	 <!--
+	 	taken from https://stackoverflow.com/questions/62029757/nicely-formatted-python-code-in-html-files
+	 -->
+
+	 <script src=
+	"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML">
+	</script>
+	<!--
+    taken from https://stackoverflow.com/questions/11561137/html-css-for-brackets-around-mathematical-matrix-prefer-lightweight/11561235
+    -->
+
+</head>
+
+<style>
+
+    p {
+    	text-align: left;
+    	text-indent: 30px;
+    	font-size: 20px;
+    }
+    pre {
+
+
+    	
+    }
+
+    #canvas-container {
+    	width:100%;
+    	text-align: center;
+    }
+
+    canvas {
+    	border: 1px solid black;
+    	display: inline;
+    	width: 500px;
+    	height: 300;
+    	align-self: center;
+    }
+
+    div {
+    	text-align: center;
+    }
+
+
+
+</style>
+
+<script type="application/javascript">
+
+	var curr = 1;
+
+	var canWidth = 300;
+	var canHeight = 150;
+
+	var bfRect = [];
+	var currs = [0, -1];
+	var bfNum = 9;
+	var bfRectSize = 15;
+
+	var cpolya = [];
+	var cpolyb = [];
+	var cpolyind = 1;
+	var polysize = 6;
+
+	var currcirc = 1;
+	var isdoing = false;
+	var numpts = 8;
+
+	function grandint() {
+		curr += 1;
+		curr *= 696969420;
+		curr %= 1000000007;
+		return curr;
+	}
+	
+	function drawbruteforce() {
+		var canvas = document.getElementById('bruteforce');
+
+		if (canvas.getContext) {
+			var ctx = canvas.getContext('2d');
+
+			ctx.clearRect(0, 0, canWidth, canHeight);
+
+			ctx.fillStyle = 'rgb(200, 0, 0)';
+
+			bfRect = []
+			bfRect.push([])
+
+
+			for (var i = 0; i < bfNum; i++) {
+				bfRect[0].push(22.5 + (30) * i + 7.5);
+				ctx.fillRect(22.5 + (30) * i, 20, 15, 15);
+			}
+
+			ctx.fillStyle = 'rgb(0, 200, 0)';
+			bfRect.push([])
+
+			for (var i = 0; i < 9; i++) {
+				bfRect[1].push(22.5 + 30 * i + 7.5);
+				ctx.fillRect(22.5 + 30 * i, 67.5, 15, 15);
+			}
+
+			ctx.fillStyle = 'rgb(0, 0, 200)';
+			bfRect.push([])
+
+			for (var i = 0; i < 18; i++) {
+				bfRect[2].push(20 + 15 * i + (7.5/2));
+				rect = ctx.fillRect(20 + 15 * i, 115, 7.5, 15);
+			}
+
+			currs = [0, -1];
+
+		}
+	}
+
+	function bfnext() {
+
+		if (currs[0] == bfRect[0].length - 1 && currs[1] == bfRect[0].length - 1)
+			return;
+
+		var canvas = document.getElementById('bruteforce');
+		var ctx = canvas.getContext('2d');
+
+		ctx.clearRect(0, 35, 1000, 32.5);
+		ctx.clearRect(0, 82.4, 1000, 32.5);
+
+		currs[1]++;
+		if (currs[1] == bfRect[0].length) {
+			currs[1] = 0;
+			currs[0]++;
+		}
+
+		var x1 = bfRect[0][currs[0]];
+		var x2 = bfRect[1][currs[1]];
+
+		ctx.beginPath();
+		ctx.moveTo(x1, 35);
+		ctx.lineTo(x2, 67.5);
+		ctx.moveTo(x2, 67.5 + 15);
+		ctx.lineTo(bfRect[2][currs[0] + currs[1]], 115);
+		ctx.stroke();
+
+	}
+
+	function polynext() {
+
+		if (cpolyind >= cpolya.length) return;
+
+		var canvas = document.getElementById("pvf");
+		var ctx = canvas.getContext('2d');
+		ctx.font = "20px Times";
+
+		var ncols = polysize + 1;
+		var nrows = 4;
+
+		var hoffset = canWidth / (ncols + 2);
+		var voffset = canHeight / (nrows + 2);
+
+		ctx.fillText(cpolya[cpolyind] * cpolyb[cpolyind], hoffset * (1.5 + cpolyind) - 7, voffset * 4.5 + 7);
+		cpolyind++;
+
+	}
+
+	function getpoly() {
+
+		cpolyind = 1;
+		cpolya = [];
+		cpolyb = [];
+
+		for (var i = 0; i <= polysize; ++i) {
+			cpolya.push(grandint()%10);
+			cpolyb.push(grandint()%10);
+		}
+
+		var canvas = document.getElementById("pvf");
+		var ctx = canvas.getContext('2d');
+		ctx.font = "20px Times";
+
+		ctx.clearRect(0, 0, canWidth, canHeight);
+
+		var ncols = polysize + 1;
+		var nrows = 4;
+
+		var hoffset = canWidth / (ncols + 2);
+		var voffset = canHeight / (nrows + 2);
+
+		ctx.beginPath();
+
+		for (var i = 0; i <= nrows; i++) {
+			ctx.moveTo(hoffset, voffset + voffset * i);
+			ctx.lineTo(canWidth - hoffset, voffset + voffset * i);
+		}
+
+		for (var i = 0; i <= ncols; i++) {
+			ctx.moveTo(hoffset + i * hoffset, voffset);
+			ctx.lineTo(hoffset + i * hoffset, canHeight - voffset);
+			if (i > 0 && i < ncols) {
+				ctx.fillText(i, hoffset * (1.5 + i) - 7, voffset * 1.5 + 7);
+				ctx.fillText(cpolya[i], hoffset * (1.5 + i) - 7, voffset * 2.5 + 7);
+				ctx.fillText(cpolyb[i], hoffset * (1.5 + i) - 7, voffset * 3.5 + 7);
+
+			}
+		}
+
+		ctx.fillText("X", hoffset * 1.5 - 7, voffset * 1.5 + 7);
+		ctx.fillText("F", hoffset * 1.5 - 7, voffset * 2.5 + 7);
+		ctx.fillText("G", hoffset * 1.5 - 7, voffset * 3.5 + 7);
+		ctx.font = "15px Times";
+		ctx.fillText("F*G", hoffset * 1.5 - 13, voffset * 4.5 + 5);
+
+		ctx.stroke();
+
+	}
+
+	function drawcircle() {
+
+		var c = document.getElementById("dnq");
+		var ctx = c.getContext("2d");
+
+		ctx.clearRect(0, 0, canWidth, canHeight);
+
+		var rad = 50
+
+		ctx.beginPath();
+		ctx.arc(canWidth/2, canHeight/2, rad, 0, 2 * Math.PI);
+		ctx.stroke();
+
+		for (var i = 0; i < numpts; i++) {
+			ctx.moveTo(canWidth/2, canHeight/2);
+			var ang = currcirc * i * 2 * Math.PI / numpts;
+			ctx.lineTo(canWidth/2 + rad * Math.cos(ang), canHeight/2 + rad * Math.sin(ang));
+		}
+
+		ctx.stroke();
+
+	}
+
+	function doanim() {
+
+		isdoing = true;
+
+		var c = document.getElementById("dnq");
+		var ctx = c.getContext("2d");
+
+
+		if (currcirc >= 2) {
+			currcirc = 2;
+			drawcircle();
+			isdoing = false;
+			return;
+		}
+
+	
+		var cycle = 200;
+
+		currcirc += 1/cycle;
+		drawcircle();
+		
+		window.requestAnimationFrame(doanim);
+
+	}
+
+	function resetcircle() {
+		if (isdoing) return;
+
+		currcirc = 1;
+		drawcircle();
+
+	}
+
+	function initall() {
+		drawbruteforce();
+		getpoly();
+		resetcircle();
+	}
+
+
+</script>
+
+<body onload="initall();">
+	<p>
+
+		The Fast Fourier Transform is often used to quickly multiply large polynomials. Brute force is slow, as it takes quadratic time with respect to the size of the polynomial.
+
+	</p>
+
+	<div>This visualization shows why brute force multiplication takes \(N^2\) time. Here, the red and green squares represent the coefficients of the polynomials being multiplied. A line between a red and a green box means that their coefficients are being multiplied, and the result will be added to the blue box the last line points to.</div>
+
+	<div id="canvas-container">
+		
+		<canvas id="bruteforce">
+			
+			Canvas is not supported.
+
+		</canvas>
+
+	</div>
+
+	<div>
+		<button onclick="bfnext()">Next</button>
+		<button onclick="drawbruteforce()">Reset</button>
+	</div>
+
+	<p>
+
+		Polynomials are typically represented in coefficient form, or a sequence of coefficients. To multiply polynomials, it is more efficient to use point-value form: a set of points on the polynomial.
+
+	</p>
+
+	<div>
+		This visualization shows why point-value form is useful for quickly multiplying polynomials. Here, polynomials \(F\) and \(G\) are evaluated at points x = 1, 2, 3, ..., 6. From here, it is easy to find \(F * G\) at these points.
+	</div>
+
+	<div id="canvas-container">
+		<canvas id="pvf">
+			
+			Canvas is not supported.
+
+		</canvas>
+	</div>
+
+	<div>
+		<button onclick="polynext()">Next</button>
+		<button onclick="getpoly()">Reset</button>
+	</div>
+
+	<p>
+		
+		If they are evaluated at the same set of points, polynomials in point-value form can be multiplied quickly. However, evaluating polynomials can take as long as brute force. \(n\) points are needed to represent a polynomial (where \(n\) is the degree of the polynomial), and each point takes linear time to evaluate (each x-value must be plugged into the N terms of the polynomial).
+
+	</p>
+
+	<p>
+		
+		The solution is to evaluate the polynomial at the n-th roots of 1. In other words, \(cis(0), cis(\frac{2π}{n}), cis(\frac{4π}{n})\), and so on (call these \(w_0, w_1, w_2, ... w_{n-1}\)). Next, split up the polynomial into even and odd-powered terms.</p>
+
+		<p>
+			
+			\(f_{even}(x) = a_0 + a_2x + a_4x^2 + a_6x^3 + ...\)
+		</p>
+		<p>
+			\(f_{odd}(x) = a_1 + a_3x + a_5x^2 + a_7x^3 + ...\)
+
+		</p>
+		<p>
+			\(f_{orig}(x) = f_{even}(x^2) + x*f_{odd}(x^2)\)
+		</p>
+
+		<p>After factoring <i>x</i> out of the odd-powered polynomial, these two smaller polynomials need to be evaluated at \(w_0^2, w_1^2\), and so on. It turns out that there is some overlap.
+
+	</p>
+
+	<div>
+		This visualization shows why \(f_{even}\) and \(f_{odd}\) only need to be evaluated at half as many points. As you square the roots of unity, you can think of them as rotating on the unit circle, and eventually, when they are squared, they end up as half as many points. It's easier to understand this with the animation.
+	</div>
+
+	<div id="canvas-container">
+	<canvas id="dnq">
+			
+		Canvas is not supported.
+
+	</canvas>
+	</div>
+	<div>
+		<button onclick="doanim()">Play</button>
+		<button onclick="resetcircle()">Reset</button>
+	</div>
+
+	<p>
+		
+		So, the two smaller polynomials only need to be evaluated at \(\frac{n}{2}\) points. Using a divide-and-conquer technique, the polynomials can be split up until they are of size 1, and need to be evaluated at 1 point. A small technicality is that the original polynomial must have a size that is a power of 2, but this can be done by padding it with zeros (for instance, \(x^2 + x + 1\) would become \(0x^3 + x^2 + x + 1\)).
+
+	</p>
+
+	<p>
+		
+		Here is code in Python carrying out this technique:
+
+	
+
+	
+		
+		<pre><code class="python">
+import math
+
+def cis(v):
+	xval = math.cos(2 * v * math.pi)
+	yval = math.sin(2 * v * math.pi)
+	return complex(xval, yval)
+
+def fft(p): # p is the polynomial in coefficient form
+	
+	n = len(p)
+
+	# base case
+	if n == 1:
+		return [complex(p[0], 0)]
+	
+	# split the polynomial
+	eventerms = []
+	oddterms = []
+
+	for i in range(n):
+		if i % 2 == 0:
+			eventerms.append(p[i])
+		else:
+			oddterms.append(p[i])
+
+	# divide and conquer
+	eventerms = fft(eventerms)
+	oddterms = fft(oddterms)
+
+	res = [None for i in range(n)]
+	
+	for i in range(len(eventerms)):
+
+		v1 = cis(i/n)
+		v2 = cis((i + n//2)/n)
+		
+		res[i] = eventerms[i] + (oddterms[i] * v1)
+		res[i + n//2] = eventerms[i] + (oddterms[i] * v2)
+
+	return res
+	</code></pre>
+
+	</p>
+	
+	<p>
+		
+		Now, the issue that remains is how to convert from point-value form back to coefficient form. This problem is more easily solved when evaluation is represented as a matrix multiplication. Here are the details:
+
+	</p>
+
+
+
+	<p>
+		
+		\[ \left( \begin{array}{cc}
+		w_0^0 & w_0^1 & w_0^2 & … & w_{0}^{n-1} \\
+		w_1^0 & w_1^1 & w_1^2 & … & w_{1}^{n-1} \\
+		w_{2}^2 & w_{2}^2 & w_{2}^2 & … & w_{2}^{n-1} \\
+		⋮ \\
+		w_{n-1}^{0} & w_{n-1}^{1} & w_{n-1}^{2} & … & w_{n-1}^{n-1} \\
+		\end{array} \right)
+
+		%
+
+		\left( \begin{array}{cc}
+		a_0 \\
+		a_1 \\
+		a_2 \\
+		⋮ \\
+		a_{n-1} \\
+		
+		\end{array} \right)
+
+		%
+
+		=
+
+		%
+
+		\left( \begin{array}{cc}
+		v_0 \\
+		v_1 \\
+		v_2 \\
+		⋮ \\
+		v_{n-1} \\
+		
+		\end{array} \right)
+
+		\]
+
+
+
+		Here, \(a_0, a_1, ... , a_{n-1}\) are the coefficients of the polynomial, and \(v_0, v_1, ... , v_{n-1}\) is the matrix containing the results of the evaluation (the 'y-values').
+
+	</p>
+
+	<p>
+		
+		Taking the inverse of the first matrix and multiplying both sides:
+
+		\[ \frac{1}{n} \left( \begin{array}{cc}
+		w_0^0 & w_0^{-1} & w_0^{-2} & … & w_{0}^{-(n-1)} \\
+		w_1^0 & w_1^{-1} & w_1^{-2} & … & w_{1}^{-(n-1)} \\
+		w_{2}^0 & w_{2}^{-1} & w_{2}^{-2} & … & w_{2}^{-(n-1)} \\
+		⋮ \\
+		w_{n-1}^{0} & w_{n-1}^{-1} & w_{n-1}^{-2} & … & w_{n-1}^{-(n-1)} \\
+		\end{array} \right)
+
+		%
+
+
+		\left( \begin{array}{cc}
+		v_0 \\
+		v_1 \\
+		v_2 \\
+		⋮ \\
+		v_{n-1} \\
+		
+		\end{array} \right)
+
+		%
+
+		=
+
+		%
+
+		\left( \begin{array}{cc}
+		a_0 \\
+		a_1 \\
+		a_2 \\
+		⋮ \\
+		a_{n-1} \\
+		
+		\end{array} \right)
+
+		\]
+
+		(Carrying out the actual matrix multiplication will show that these two n-by-n matricies are inverses of each other). The main thing to notice is that the two are almost identical, and with some minor modifications to the FFT code, converting back to coefficient form can also be done in \(N lg(N)\) time.
+
+	</p>
+
+	<p>
+		
+		The final, functional code:
+
+		<pre><code class="python">
+
+import math
+
+def cis(v, doinverse):
+
+	if doinverse:
+		v = -v
+
+	xval = math.cos(2 * v * math.pi)
+	yval = math.sin(2 * v * math.pi)
+	return complex(xval, yval)
+
+def fft(p, doinverse): # p is the polynomial in coefficient form
+	
+	n = len(p)
+
+	# base case
+	if n == 1:
+		return [complex(p[0], 0)]
+	
+	# split the polynomial
+	eventerms = []
+	oddterms = []
+
+	for i in range(n):
+		if i % 2 == 0:
+			eventerms.append(p[i])
+		else:
+			oddterms.append(p[i])
+
+	# divide and conquer
+	eventerms = fft(eventerms, doinverse)
+	oddterms = fft(oddterms, doinverse)
+
+	res = [None for i in range(n)]
+	
+	for i in range(len(eventerms)):
+
+		v1 = cis(i/n, doinverse)
+		v2 = cis((i + n//2)/n, doinverse)
+		
+		res[i] = eventerms[i] + (oddterms[i] * v1)
+		res[i + n//2] = eventerms[i] + (oddterms[i] * v2)
+
+	return res
+
+def mult(p1, p2):
+
+	pow2 = 1
+	while pow2 < max(len(p1), len(p2)):
+		pow2 *= 2
+	pow2 *= 2
+
+	while len(p1) < pow2:
+		p1.append(0)
+	while len(p2) < pow2:
+		p2.append(0)
+
+	# pad the polynomials with zeros
+
+	r1 = fft(p1, False)
+	r2 = fft(p2, False)
+
+
+	for i in range(len(r1)):
+		r1[i] *= r2[i]
+
+	res = [i.real for i in fft(r1, True)]
+
+	for i in range(len(res)):
+		res[i] /= len(r1)
+
+	return res 
+
+
+p1 = [1, 1] # 1 + x
+p2 = [1, 0, 0, 1] # 1 + x^3
+
+print(mult(p1, p2)) # expected, 1 + x + x^3 + x^4
+
+# output: [0.999, 1.0, -5.55e-17, 0.999, 1.0, 0.0, 5.551e-17, 0.0]
+
+
+		</code></pre>
+
+	</p>
+
+
+
+</body>
+  
+
+</html>
