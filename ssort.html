@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>Selection Sort</title>
+	</head>
+
+	<style>
+		canvas {
+	    	border: 1px solid black;
+	    	display: inline;
+	    	width: 500px;
+	    	height: 300px;
+	    	align-self: center;
+	    }
+
+	    div {
+	    	text-align: center;
+	    }
+
+	</style>
+
+	<script>
+		
+		var arr = [];
+		var arrsz = 0;
+
+		var canvasWidth = 300;
+		var canvasHeight = 150;
+		var defaultSize = 50;
+		var unmarkedColor = 'rgb(0, 0, 0)';
+		var markedColor = 'rgb(200, 0, 0)';
+
+		var currbase = 0;
+		var currmax = -1;
+		var currind = 0;
+		var animStarted = false;
+
+		var curr = 1;
+		function grandint() {
+			curr += 1;
+			curr *= 696969420;
+			curr %= 1000000007;
+			return curr;
+		}
+
+		function genarray(l) {
+
+			var rem = [];
+			for (var i = 1; i <= l; i++)
+				rem.push(i);
+
+			arr = [];
+			arrsz = l;
+
+			for (var i = l - 1; i >= 0; i--) {
+				var cind = grandint() % (i + 1);
+				arr.push(rem[cind]);
+				rem[cind] = rem[i];
+			}
+
+		}
+
+		function drawArray() {
+
+			var canvas = document.getElementById("array");
+			var ctx = canvas.getContext("2d");
+
+			ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+			ctx.fillStyle = unmarkedColor;
+
+			var eachWidth = canvasWidth / arrsz;
+			var baseHeight = canvasHeight / (arrsz + 1);
+
+			for (var i = 0; i < arrsz; i++) {
+				ctx.fillRect(i * eachWidth, canvasHeight - (baseHeight * arr[i]), eachWidth, arr[i] * baseHeight);
+			}
+
+		}
+
+		function mark(ind, doMark = true) {
+
+			var canvas = document.getElementById("array");
+			var ctx = canvas.getContext("2d");
+
+			if (doMark == true)
+				ctx.fillStyle = markedColor;
+			else
+				ctx.fillStyle = unmarkedColor;
+
+			var eachWidth = canvasWidth / arrsz;
+			var baseHeight = canvasHeight / (arrsz + 1);
+
+			ctx.fillRect(ind * eachWidth, canvasHeight - (baseHeight * arr[ind]), eachWidth, arr[ind] * baseHeight);
+
+		}
+
+		function makeArray() {
+
+			if (arrsz == 0)
+				arrsz = defaultSize;
+
+			genarray(arrsz);
+			drawArray();
+
+			currbase = 0;
+			currind = 0;
+			currmax = -1;
+			animStarted = false;
+
+		}
+
+		function makeReverseArray() {
+
+			if (arrsz == 0)
+				arrsz = defaultSize;
+
+			arr = [];
+			for (var i = 0; i < arrsz; i++)
+				arr.push(arrsz - i);
+
+			drawArray();
+
+			currbase = 0;
+			currind = 0;
+			currmax = -1;
+			animStarted = false;
+
+		}
+
+		function nextStep() {
+
+			// edge cases: end of sorting, or time to swap
+
+			if (currbase >= arrsz - 1 && currind >= arrsz - 1) {
+				if (currmax == -1) {
+					mark(arrsz - 1);
+					currmax = arrsz - 1;
+					return true;
+				}
+				else {
+					mark(arrsz - 1, false);
+					return false;
+				}
+			}
+
+			if (currmax == -1) {
+				currmax = currind;
+				mark(currind);
+				currind += 1;
+				return true;
+			}
+
+			// otherwise, mark all
+
+			for (var i = 0; i < arrsz; i++)
+				mark(i, false);
+
+			mark(currmax, true);
+			mark(currind, true);
+			
+			if (currind == arrsz) {
+
+				var temp = arr[currmax];
+				arr[currmax] = arr[currbase];
+				arr[currbase] = temp;
+
+				currbase += 1;
+				currmax = -1;
+				currind = currbase;
+
+				drawArray();
+
+				return true;
+			}
+
+			if (arr[currind] < arr[currmax]) {
+				currmax = currind;
+			}
+
+			currind += 1;
+
+			return true;
+
+		}
+
+		function doanim() {
+
+			if (animStarted == false) return;
+
+			var canvas = document.getElementById("array");
+			var ctx = canvas.getContext("2d");
+
+			var keepdoing = nextStep();
+			if (keepdoing == true) {
+
+				window.requestAnimationFrame(doanim);
+
+			}
+
+		}
+
+		function startAnim() {
+			animStarted = true;
+			doanim();
+		}
+
+		function stopAnim() {
+			animStarted = false;
+		}
+
+		function regenArray() {
+			
+			var userChosenSize = document.getElementById("chosenSize").value;
+			userChosenSize = parseInt(userChosenSize);
+
+			var ok = true;
+
+			if (typeof(userChosenSize) != "number") ok = false;
+			if (userChosenSize < 1 || userChosenSize > 100) ok = false;
+			if (isNaN(userChosenSize)) ok = false;
+
+			if (ok == false) {
+				arrsz = 0;
+			}
+			else {
+				arrsz = userChosenSize;
+			}
+
+			makeArray();
+
+		}
+
+	</script>
+
+	<body onload="makeArray()">
+		
+		<div><canvas id="array">
+				
+			Canvas is not supported.
+
+		</div></canvas>
+
+		<div>
+			<button onclick="makeArray()">Random Array</button>
+			<button onclick="makeReverseArray()">Reversed Array</button>
+			<label> Array Size: </label>
+			<input type="number" id="chosenSize" min=1 max=100>
+			<button onclick="regenArray()"> Submit </button>
+		</div>
+
+		</div>
+		<div>
+			<button onclick="nextStep()">Next</button>
+			<button onclick="startAnim()">Play</button>
+			<button onclick="stopAnim()">Pause</button>
+		</div>
+
+
+	</body>
+
+
+
+
+</html>
