@@ -21,32 +21,54 @@
 	</style>
 
 	<script>
+
+		const SELECTIONSORT = 0;
+		const INSERTIONSORT = 1;
+		const QUICKSORT = 2;
+		const MERGESORT = 3;
+
+		const SET = 0;
+		const MARK = 1;
+
+		const canvasWidth = 300;
+		const canvasHeight = 150;
+		const defaultSize = 50;
+		const unmarkedColor = 'rgb(0, 0, 0)';
+		const markedColor = 'rgb(200, 0, 0)';
+
+		const maxArraySize = 300;
 		
-		var arr = [];
-		var arrsz = 0;
+		var arr = []; // the current array
+		var arrsz = 0; // the current size of the array
 
-		var canvasWidth = 300;
-		var canvasHeight = 150;
-		var defaultSize = 50;
-		var unmarkedColor = 'rgb(0, 0, 0)';
-		var markedColor = 'rgb(200, 0, 0)';
+		var temp = []; // helper array for sorting
+		/*
+	
+			list of instructions for the sorting
+			each element has list of elements to set
+			and elements to mark
 
-		var currbase = 0;
-		var currmax = -1;
-		var currind = 0;
-		var animStarted = false;
+		*/
+		var todo = [];
+		var whichOne = SELECTIONSORT;
+		var todoInd = 0; // which instruction to do right now
+		var animStarted = false; // is the automatic animation running?
+		var todoPrepared = false; // have the instructions been prepared?
 
-		var curr = 1;
+		// generates a random number
+		var randHelper = 1;
 		function grandint() {
-			curr += 1;
-			curr *= 696969420;
-			curr %= 1000000007;
-			return curr;
+			randHelper += 1;
+			randHelper *= 696969420;
+			randHelper %= 1000000007;
+			return randHelper;
 		}
 
+		// generates a random array with the current length
 		function genarray(l) {
 
 			var rem = [];
+
 			for (var i = 1; i <= l; i++)
 				rem.push(i);
 
@@ -61,6 +83,7 @@
 
 		}
 
+		// draws the current array
 		function drawArray() {
 
 			var canvas = document.getElementById("array");
@@ -79,6 +102,8 @@
 
 		}
 
+		// marks the element at the given index on the canvas
+		// if domark is false, unmarks the element
 		function mark(ind, doMark = true) {
 
 			var canvas = document.getElementById("array");
@@ -96,21 +121,34 @@
 
 		}
 
+		function prepAll() {
+
+			drawArray();
+
+			animStarted = false;
+			temp = [];
+			todo = [];
+			todoInd = 0;
+			todoPrepared = false;
+
+			prepareSort();
+
+		}
+
+		// generates an array with the current length
+		// resets all the animations
 		function makeArray() {
 
 			if (arrsz == 0)
 				arrsz = defaultSize;
 
 			genarray(arrsz);
-			drawArray();
-
-			currbase = 0;
-			currind = 0;
-			currmax = -1;
-			animStarted = false;
+			
+			prepAll();
 
 		}
 
+		// makes a reversed array with the current length
 		function makeReverseArray() {
 
 			if (arrsz == 0)
@@ -122,69 +160,138 @@
 
 			drawArray();
 
-			currbase = 0;
-			currind = 0;
-			currmax = -1;
-			animStarted = false;
+			prepAll();
 
 		}
 
-		function nextStep() {
+		// sets the algorithm to do
+		function setAlgo(algoChosen) {
+			whichOne = algoChosen;
+			makeArray();
+		}
 
-			// edge cases: end of sorting, or time to swap
+		// runs selection sort
+		function selectionSort() {
 
-			if (currbase >= arrsz - 1 && currind >= arrsz - 1) {
-				if (currmax == -1) {
-					mark(arrsz - 1);
-					currmax = arrsz - 1;
-					return true;
+			if (todoPrepared) return;
+
+			for (var i = 0; i < arr.length; i++)
+				temp.push(arr[i]);
+
+			for (var i = 0; i < temp.length; i++) {
+
+				todo.push([[], [i]]);
+				var cmin = i;
+				for (var j = i + 1; j < temp.length; j++) {
+
+					todo.push([[], [cmin, j]]);
+					if (temp[cmin] > temp[j])
+						cmin = j;
+
+				}
+
+				todo.push([[ [i, temp[cmin]], [cmin, temp[i]] ], []]);
+				var cv = temp[cmin];
+				temp[cmin] = temp[i];
+				temp[i] = cv;
+
+			}
+			
+		}
+
+		function mergeSortRec(l, r) {
+
+			if (l == r) {
+				todo.push([[], [l]]);
+				return;
+			}
+
+			var mid = Math.floor((l + r) / 2);
+
+			mergeSortRec(l, mid);
+			mergeSortRec(mid + 1, r);
+
+			var csorted = [];
+
+			var p1 = l;
+			var p2 = mid + 1;
+
+			while (p1 <= mid || p2 <= r) {
+
+				if (p1 > mid) {
+					todo.push([[], [p2]]);
+					csorted.push(temp[p2]);
+					p2 += 1;
+				}
+				else if (p2 > r) {
+					todo.push([[], [p1]]);
+					csorted.push(temp[p1]);
+					p1 += 1;
 				}
 				else {
-					mark(arrsz - 1, false);
-					return false;
+					if (temp[p1] < temp[p2]) {
+						todo.push([[], [p1, p2]]);
+						csorted.push(temp[p1]);
+						p1 += 1;
+					}
+					else {
+						todo.push([[], [p1, p2]]);
+						csorted.push(temp[p2]);
+						p2 += 1;
+					}
 				}
+
 			}
 
-			if (currmax == -1) {
-				currmax = currind;
-				mark(currind);
-				currind += 1;
-				return true;
+			// console.log(csorted);
+
+			topush = [];
+			for (var i = 0; i < csorted.length; i++) {
+				topush.push([l + i, csorted[i]]);
+				temp[l + i] = csorted[i];
+			}
+			todo.push([topush, []]);
+
+
+		}
+
+		function mergeSort() {
+			for (var i = 0; i < arr.length; i++)
+				temp.push(arr[i]);
+			mergeSortRec(0, arr.length - 1);
+		}
+
+		function prepareSort() {
+			if (whichOne == SELECTIONSORT)
+				selectionSort();
+			if (whichOne == MERGESORT)
+				mergeSort();
+		}
+
+		// takes the next step in sorting
+		function nextStep() {
+
+			if (todoInd == todo.length) {
+				animStarted = false;
+				return false;
 			}
 
-			// otherwise, mark all
-
-			for (var i = 0; i < arrsz; i++)
-				mark(i, false);
-
-			mark(currmax, true);
-			mark(currind, true);
+			for (var i = 0; i < todo[todoInd][SET].length; i++)
+				arr[todo[todoInd][SET][i][0]] = todo[todoInd][SET][i][1];
 			
-			if (currind == arrsz) {
+			drawArray();
 
-				var temp = arr[currmax];
-				arr[currmax] = arr[currbase];
-				arr[currbase] = temp;
+			for (var i = 0; i < todo[todoInd][MARK].length; i++)
+				mark(todo[todoInd][MARK][i], true);
+			
 
-				currbase += 1;
-				currmax = -1;
-				currind = currbase;
-
-				drawArray();
-
-				return true;
-			}
-
-			if (arr[currind] < arr[currmax]) {
-				currmax = currind;
-			}
-
-			currind += 1;
+			todoInd += 1;
 
 			return true;
 
 		}
 
+		// next step of the animation
 		function doanim() {
 
 			if (animStarted == false) return;
@@ -201,15 +308,19 @@
 
 		}
 
+		// start the animation
 		function startAnim() {
+			if (animStarted == true) return;
 			animStarted = true;
 			doanim();
 		}
 
+		// stop the animation
 		function stopAnim() {
 			animStarted = false;
 		}
 
+		// generates an array with the user-given size
 		function regenArray() {
 			
 			var userChosenSize = document.getElementById("chosenSize").value;
@@ -218,7 +329,7 @@
 			var ok = true;
 
 			if (typeof(userChosenSize) != "number") ok = false;
-			if (userChosenSize < 1 || userChosenSize > 100) ok = false;
+			if (userChosenSize < 1 || userChosenSize > maxArraySize) ok = false;
 			if (isNaN(userChosenSize)) ok = false;
 
 			if (ok == false) {
@@ -245,8 +356,8 @@
 		<div>
 			<button onclick="makeArray()">Random Array</button>
 			<button onclick="makeReverseArray()">Reversed Array</button>
-			<label> Array Size (1 - 100): </label>
-			<input type="number" id="chosenSize" min=1 max=100>
+			<label> Array Size (1 - 300): </label>
+			<input type="number" id="chosenSize" min=1 max=300>
 			<button onclick="regenArray()"> Submit </button>
 		</div>
 
@@ -255,6 +366,11 @@
 			<button onclick="nextStep()">Next</button>
 			<button onclick="startAnim()">Play</button>
 			<button onclick="stopAnim()">Pause</button>
+		</div>
+
+		<div>
+			<button onclick="setAlgo(SELECTIONSORT)">Selection Sort</button>
+			<button onclick="setAlgo(MERGESORT)">Merge Sort</button>
 		</div>
 
 
