@@ -293,11 +293,11 @@
 			var oput = r;
 
 			while (cind < oput) {
-				todo.push([[], [cind, cind + 1]]);
+				todo.push([[], [[cind, partitionColor], cind + 1]]);
 
 				if (temp[cind] > temp[cind + 1]) {
 					todo.push([[ [cind, temp[cind + 1]], [cind + 1, temp[cind]] ],
-								[[cind, partitionColor], cind + 1]]);
+								[cind, [cind + 1, partitionColor]]]);
 
 					var cv = temp[cind + 1];
 					temp[cind + 1] = temp[cind];
