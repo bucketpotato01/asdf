@@ -2,7 +2,7 @@
 <html>
 
 	<head>
-		<title>Selection Sort</title>
+		<title>Various Sorts</title>
 	</head>
 
 	<style>
@@ -261,11 +261,66 @@
 			mergeSortRec(0, arr.length - 1);
 		}
 
+		function quickSortRec(l, r) {
+
+			if (l > r) return;
+
+			if (l == r) {
+				todo.push([[], [l]]);
+				return;
+			}
+
+			var cind = l;
+			var oput = r;
+
+			while (cind < oput) {
+				todo.push([[], [cind, cind + 1]]);
+
+				if (temp[cind] > temp[cind + 1]) {
+					todo.push([[ [cind, temp[cind + 1]], [cind + 1, temp[cind]] ],
+								[cind, cind + 1]]);
+
+					var cv = temp[cind + 1];
+					temp[cind + 1] = temp[cind];
+					temp[cind] = cv;
+
+					cind += 1;
+				}
+
+				else {
+
+					todo.push([[ [cind + 1, temp[oput]], [oput, temp[cind + 1]] ],
+
+							[cind, cind + 1, oput]]);
+
+					var cv = temp[cind + 1];
+					temp[cind + 1] = temp[oput];
+					temp[oput] = cv;
+
+					oput -= 1;
+				}
+
+			}
+
+			quickSortRec(l, cind - 1);
+			quickSortRec(cind + 1, r);
+
+		}
+
+		function quickSort() {
+			for (var i = 0; i < arr.length; i++)
+				temp.push(arr[i]);
+			quickSortRec(0, arr.length - 1);
+			todo.push([[],[]]);
+		}
+
 		function prepareSort() {
 			if (whichOne == SELECTIONSORT)
 				selectionSort();
 			if (whichOne == MERGESORT)
 				mergeSort();
+			if (whichOne == QUICKSORT)
+				quickSort();
 		}
 
 		// takes the next step in sorting
@@ -371,6 +426,7 @@
 		<div>
 			<button onclick="setAlgo(SELECTIONSORT)">Selection Sort</button>
 			<button onclick="setAlgo(MERGESORT)">Merge Sort</button>
+			<button onclick="setAlgo(QUICKSORT)">Quick Sort</button>
 		</div>
 
 
