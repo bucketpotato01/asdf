@@ -35,6 +35,7 @@
 		const defaultSize = 50;
 		const unmarkedColor = 'rgb(0, 0, 0)';
 		const markedColor = 'rgb(200, 0, 0)';
+		const partitionColor = 'rgb(148,0,211)';
 
 		const maxArraySize = 300;
 		
@@ -104,15 +105,12 @@
 
 		// marks the element at the given index on the canvas
 		// if domark is false, unmarks the element
-		function mark(ind, doMark = true) {
+		function mark(ind, whatMark = markedColor) {
 
 			var canvas = document.getElementById("array");
 			var ctx = canvas.getContext("2d");
 
-			if (doMark == true)
-				ctx.fillStyle = markedColor;
-			else
-				ctx.fillStyle = unmarkedColor;
+			ctx.fillStyle = whatMark;
 
 			var eachWidth = canvasWidth / arrsz;
 			var baseHeight = canvasHeight / (arrsz + 1);
@@ -266,8 +264,6 @@
 
 			}
 
-			// console.log(csorted);
-
 			topush = [];
 			for (var i = 0; i < csorted.length; i++) {
 				topush.push([l + i, csorted[i]]);
@@ -301,7 +297,7 @@
 
 				if (temp[cind] > temp[cind + 1]) {
 					todo.push([[ [cind, temp[cind + 1]], [cind + 1, temp[cind]] ],
-								[cind, cind + 1]]);
+								[[cind, partitionColor], cind + 1]]);
 
 					var cv = temp[cind + 1];
 					temp[cind + 1] = temp[cind];
@@ -314,7 +310,7 @@
 
 					todo.push([[ [cind + 1, temp[oput]], [oput, temp[cind + 1]] ],
 
-							[cind, cind + 1, oput]]);
+							[[cind, partitionColor], cind + 1, oput]]);
 
 					var cv = temp[cind + 1];
 					temp[cind + 1] = temp[oput];
@@ -365,8 +361,13 @@
 			
 			drawArray();
 
-			for (var i = 0; i < todo[todoInd][MARK].length; i++)
-				mark(todo[todoInd][MARK][i], true);
+			for (var i = 0; i < todo[todoInd][MARK].length; i++) {
+				if (Array.isArray(todo[todoInd][MARK][i])) {
+					mark(todo[todoInd][MARK][i][0], todo[todoInd][MARK][i][1]);
+				}
+				else
+					mark(todo[todoInd][MARK][i]);
+			}
 			
 
 			todoInd += 1;
