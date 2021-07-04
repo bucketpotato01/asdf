@@ -13,6 +13,7 @@ const unfinishedOffset = 20; // how far to offset nodes still being inserted int
 const nodeIdPrefix = "bstVisNode"; 
 const bstVisID = "bstvis";
 const inputID = "valueInput";
+const edgeIdPrefix = "bstEdge";
 
 // constants for the workings of the BST
 const nullNode = -1;
@@ -20,6 +21,7 @@ const VALUE = 0; // value stored in the node
 const CHILD = 1; // children of the node
 const VISID = 2; // the ID of the node in the html file
 const COORD = 3; // where to draw the node
+const EDGE  = 4; // id of edge to parent
 
 var datums = []; // stores the BST
 var currID = 0;  // ids to assign the nodes in the html file
@@ -32,7 +34,7 @@ var currNodeID = -1;  // what is the ID of the node being inserted?
 var cdep = 0;         // what is the current depth?
 var cacross = 0;      // where in this depth level is the node?
 var cx, cy, gx, gy;   // helper variables for the animation
-
+var pdep, pacc;       // the parent of the current node
 
 function vis() { return document.getElementById(bstVisID); }
 
@@ -100,7 +102,8 @@ function newNode(val, id, dep, whichleft) {
 	return [val,                // value stored
 		    [-1, -1],           // left, right children
 		    id,                 // id of the node
-		    [dep, whichleft]];  // where to draw it   
+		    [dep, whichleft],   // where to draw it
+		    false];             // does it have an edge connecting it to its parent?
 }
 
 function moveThing(id, x, y) {
@@ -111,6 +114,15 @@ function moveThing(id, x, y) {
 
 }
 
+function walkTo(coords, goal, dToWalk) {
+	var tdist = ((goal[1] - coords[1])**2 + (goal[0] - coords[0])**2) ** 0.5;
+	var xratio = (goal[0] - coords[0]) / tdist;
+	var cdx = xratio * dToWalk;
+	var yratio = (goal[1] - coords[1]) / tdist;
+	var cdy = yratio * dToWalk;
+	return [coords[0] + cdx, coords[1] + cdy];
+}
+
 function animateNode() {
 
 	if (cy >= gy) {
@@ -118,17 +130,39 @@ function animateNode() {
 		return 1;
 	}
 
-	var xratio = (gx - cx) / (((gx-cx)**2 + (gy-cy)**2)**0.5);
-	var cdx = xratio * deltaMove;
-	var cdy = (deltaMove**2 - cdx**2)**0.5;
+	var newCoords = walkTo([cx, cy], [gx, gy], deltaMove);
 
-	moveThing(currNodeID, cx + cdx, cy + cdy);
-	cx += cdx;
-	cy += cdy;
-	
+	moveThing(currNodeID, newCoords[0], newCoords[1]);
+	cx = newCoords[0];
+	cy = newCoords[1];
+
 	var req = window.requestAnimationFrame(animateNode);
 	return 1;
 
+}
+
+function makeLine(pd, pa, cd, ca, id) {
+	if (pd == -1 || pa == -1) return false;
+	var par = getCoords(pd, pa);
+	var cur = getCoords(cd, ca);
+
+	var temp1 = walkTo(par, cur, nodeSize);
+	var temp2 = walkTo(cur, par, nodeSize);
+
+	par = temp1;
+	cur = temp2;
+
+	var cline = document.createElement('line');
+	cline.setAttribute('x1', par[0]);
+	cline.setAttribute('y1', par[1]);
+	cline.setAttribute('x2', cur[0]);
+	cline.setAttribute('y2', cur[1]);
+	cline.setAttribute('id', edgeIdPrefix + id);
+	cline.setAttribute('stroke-width', 1);
+	cline.setAttribute('stroke', 'black');
+	vis().appendChild(cline);
+	vis().innerHTML += "";
+	return true;
 }
 
 function nextStep() {
@@ -150,6 +184,9 @@ function nextStep() {
 		else {
 			var initLoc = getCoords(0, 0, false);
 			var prevLoc = getCoords(cdep, cacross, false);
+
+			pacc = cacross;
+			pdep = cdep;
 
 			if (toInsert < cdatum) {
 				if (datums[currDatumInd][CHILD][0] == -1)
@@ -193,6 +230,10 @@ function nextStep() {
 			gx = newLoc[0] - initLoc[0];
 			gy = newLoc[1] - initLoc[1];
 
+			if (makeLine(pdep, pacc, cdep, cacross, currNodeID))
+				datums[currDatumInd][EDGE] = true;
+
+
 			animateNode();
 		}
 
@@ -218,6 +259,8 @@ function addNode() {
 
 	cdep = 0;
 	cacross = 0;
+	pacc = -1;
+	pdep = -1;
 
 	var sv = getCoords(0, 0, false);
 	currNodeID = createNode(sv[0], sv[1], val);
