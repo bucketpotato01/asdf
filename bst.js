@@ -109,6 +109,7 @@ function newNode(val, id, dep, whichleft) {
 function moveThing(id, x, y) {
 
 	var container = document.getElementById(nodeIdPrefix + id);
+	if (container == null) return;
 	var transformNode = 'translate(' + x + ',' + y + ')';
 	container.setAttribute('transform', transformNode);
 
@@ -213,6 +214,12 @@ function nextStep() {
 			gy = newLoc[1] - initLoc[1];
 
 			animateNode();
+
+			if (cdep > maxDepth) {
+				document.getElementById(nodeIdPrefix + currNodeID).remove();
+				foundEqual = true;
+				finished = true;
+			}
 
 		}
 	}
