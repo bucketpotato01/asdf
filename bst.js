@@ -291,3 +291,12 @@ function gogo() {
 	if (inAnim) nextStep();
 	else addNode();
 }
+
+// https://stackoverflow.com/questions/11365632/how-to-detect-when-the-user-presses-enter-in-an-input-field
+function gogoEnterPressed() {
+	var e = window.event;
+	var keyCode = e.code || e.key;
+	if (keyCode == 'Enter') {
+		gogo();
+	}
+}
