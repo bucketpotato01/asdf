@@ -239,6 +239,8 @@ function nextStep() {
 	if (finished) {
 		inAnim = false;
 
+		document.getElementById(inputID).value = "";
+
 		if (foundEqual == false) {
 			var initLoc = getCoords(0, 0, false);
 			var prevLoc = getCoords(cdep, cacross, false);
