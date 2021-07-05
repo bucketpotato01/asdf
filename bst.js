@@ -38,7 +38,7 @@ var pdep, pacc;       // the parent of the current node
 
 function vis() { return document.getElementById(bstVisID); }
 
-// returns the text for a circle on the svg
+// returns the html for a circle on the svg
 function createCircle(x, y, r = nodeSize) {
 
 	var temp = '<circle cx=' + x + 
@@ -52,6 +52,7 @@ function createCircle(x, y, r = nodeSize) {
 	return temp;
 }
 
+// returns the html to make text on the svg
 function createText(x, y, textToMake) {
 
 	var temp = '<text x=' + x + 
@@ -62,6 +63,7 @@ function createText(x, y, textToMake) {
 
 }
 
+// adds a node to the svg, returns its ID
 function createNode(x, y, val) {
 
 	var displayNode = document.createElement('g');
@@ -78,8 +80,12 @@ function createNode(x, y, val) {
 
 }
 
+// removes the specified element from the svg
 function removeFromDoc(id) { document.getElementById(id).remove(); }
 
+// takes in the depth and the position of the node at that depth
+// returns the x/y coordinates
+// finished - if not finished, moves the node up a bit
 function getCoords(dep, which, finished = true) {
 
 	var numnodes = 2 ** dep;
@@ -98,6 +104,7 @@ function getCoords(dep, which, finished = true) {
 
 }
 
+// returns the information contained in a node
 function newNode(val, id, dep, whichleft) {
 	return [val,                // value stored
 		    [-1, -1],           // left, right children
@@ -106,6 +113,7 @@ function newNode(val, id, dep, whichleft) {
 		    false];             // does it have an edge connecting it to its parent?
 }
 
+// moves the specified element by the specified x and y
 function moveThing(id, x, y) {
 
 	var container = document.getElementById(nodeIdPrefix + id);
@@ -115,6 +123,7 @@ function moveThing(id, x, y) {
 
 }
 
+// geometry - a point dToWalk away from coords in the direction towards goal
 function walkTo(coords, goal, dToWalk) {
 	var tdist = ((goal[1] - coords[1])**2 + (goal[0] - coords[0])**2) ** 0.5;
 	var xratio = (goal[0] - coords[0]) / tdist;
@@ -124,6 +133,7 @@ function walkTo(coords, goal, dToWalk) {
 	return [coords[0] + cdx, coords[1] + cdy];
 }
 
+// moves the current node from cx, cy to gx, gy
 function animateNode() {
 
 	if (cy >= gy) {
@@ -142,6 +152,7 @@ function animateNode() {
 
 }
 
+// creates an edge between two positions
 function makeLine(pd, pa, cd, ca, id) {
 	if (pd == -1 || pa == -1) return false;
 	var par = getCoords(pd, pa);
@@ -166,6 +177,7 @@ function makeLine(pd, pa, cd, ca, id) {
 	return true;
 }
 
+// takes the next step in inserting a node
 function nextStep() {
 
 	var foundEqual = false;
@@ -251,6 +263,7 @@ function nextStep() {
 
 }
 
+// creates a node
 function addNode() {
 
 	var val = document.getElementById(inputID).value;
