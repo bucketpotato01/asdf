@@ -239,8 +239,6 @@ function nextStep() {
 	if (finished) {
 		inAnim = false;
 
-		document.getElementById(inputID).value = "";
-
 		if (foundEqual == false) {
 			var initLoc = getCoords(0, 0, false);
 			var prevLoc = getCoords(cdep, cacross, false);
@@ -287,6 +285,8 @@ function addNode() {
 	var sv = getCoords(0, 0, false);
 	currNodeID = createNode(sv[0], sv[1], val);
 
+	document.getElementById(inputID).value = "";
+
 }
 
 function gogo() {
@@ -295,7 +295,7 @@ function gogo() {
 }
 
 // https://stackoverflow.com/questions/11365632/how-to-detect-when-the-user-presses-enter-in-an-input-field
-function gogoEnterPressed() {
+function gogoKeyPressed() {
 	var e = window.event;
 	var keyCode = e.code || e.key;
 	if (keyCode == 'Enter') {

@@ -3,21 +3,14 @@
 
 <script src="bst.js"></script>
 
-<style>
-	
-	svg {
-		border: 1px solid black;
-		display: inline;
-	}
 
-	div {
-		text-align: center;
-	}
-
-</style>
 
 <head>
 	<meta charset="utf-8">
+
+	<!-- https://wordpress.org/themes/twentyseventeen/ -->
+	<link rel="stylesheet" href="style.css">
+
 	<title>
 		BST Visualization
 	</title>
@@ -26,13 +19,21 @@
 <body>
 
 	<div>
-		<svg id = bstvis width="500" height="500"></svg>
-	</div>
+		<div style="text-align: center">
+			<svg id=bstvis width="500" height="500"></svg>
+		</div>
 
-	<div>
-		<label>Number: </label>
-		<input type="number" id="valueInput" onkeypress="gogoEnterPressed()">
-		<button onclick="gogo()">Go</button>
+		<div>
+			<label>Number (-99 to 99) </label>
+			<div>
+				
+				<input type="number" id="valueInput" onkeypress="gogoKeyPressed()">
+
+				<button onclick="gogo()">Insert</button>
+			
+			</div>
+		</div>
+
 	</div>
 
 </body>
