@@ -4364,6 +4364,7 @@ p > object:only-child {
 div {
 	margin: 15px 10px 10px 10px;
 	align-content: center;
+	display: table;
 }
 
 button {
