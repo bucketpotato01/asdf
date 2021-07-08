@@ -4369,10 +4369,11 @@ div {
 button {
 	float: left;
 	display: inline-block;
-	
+	margin: 3px 3px 3px 3px;
 }
 input {
 	float: left;
 	display: inline-block;
+	margin: 3px 3px 3px 3px;
 	
 }
