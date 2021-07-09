@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<script src="segtree.js"></script>
+
+
+
+<head>
+	<meta charset="utf-8">
+
+	<!-- https://wordpress.org/themes/twentyseventeen/ -->
+	<link rel="stylesheet" href="style.css">
+
+	<title>
+		Segment Tree
+	</title>
+</head>
+
+<body onload="buildSegmentTree()">
+
+	<div>
+		<div>
+			<svg id=stvis width="512" height="512"></svg>
+		</div>
+
+		<div>
+			
+			<div>
+
+				<input type="number" id="valueInput" placeholder="Value to add">
+				<input type="number" id="indexInput" placeholder="Index to add to">
+				<button onclick="updateOperation()">Go</button>
+				
+			</div>
+		</div>
+
+	</div>
+
+</body>
+</html>
