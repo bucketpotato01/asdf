@@ -18,6 +18,12 @@ const outlineIDPrefix = "outline"; // prefix for ID of a outline
 const stVisID = "stvis";           // ID of the svg
 const valInputID = "valueInput";   // ID of the value input
 const indInputID = "indexInput";   // ID of the index input
+const controlID = "controls";      // ID of the control panel
+const whereToWrite = "outputText"; // ID of the div to put text onto
+const selectionBar = "selectionBar";
+const aboutOption = "about";
+const queryOption = "query";
+const updateOption = "update";
 
 // information about the segment tree
 var arrSize = 16; // the size of the array
@@ -184,11 +190,11 @@ function buildSegmentTree() {
 
 
 // marks a node, appends the mark to the marks array
-function mark(ind, domark = true) {
+function mark(ind, domark = true, whatColor = markColor) {
 
 	var outline = document.getElementById(outlineIDPrefix + ind);
 	if (domark == true) {
-		outline.setAttribute('fill', markColor);
+		outline.setAttribute('fill', whatColor);
 		outline.setAttribute('stroke-width', markWidth);
 		marks.push(ind);
 	}
@@ -227,11 +233,87 @@ function upd(ind, toAdd) {
 
 function updateOperation() {
 	
+	document.getElementById(whereToWrite).innerHTML = "";
 	var val = parseInt(document.getElementById(valInputID).value);
 	var ind = parseInt(document.getElementById(indInputID).value);
-
+	
 	if (isNaN(val) || isNaN(ind)) return;
+	if (ind >= arrSize) {
+		document.getElementById(whereToWrite).innerHTML = "Index out of bounds";
+		return;
+	}
 	upd(ind, val);
 
+}
+
+function setHTMLToAboutSegtree() {
+	var tw = document.getElementById(whereToWrite);
+	tw.innerHTML = "";
+
+	document.getElementById(controlID).innerHTML = "";
+
+	var purpose = document.createElement("p");
+	purpose.innerHTML = 
+	"Segment trees are used for quickly modifying and querying an array: "+
+	"examples would be adding x to the value at index i, or querying the sum "+
+	"of the values between indices l and r. Doing this naively would take linear " +
+	"time for each query, but with segment trees, both operations take lg(N) time.";
+	
+	tw.appendChild(purpose);
+
+	var aboutVis = document.createElement("p");
+	aboutVis.innerHTML =
+	"This visualization supports point add and range sum query operations. " +
+	"However, this basic segment tree can be modified to support other operations: " +
+	"for instance, point add/range min, point set/range sum, point add/range gcd, just to name a few.";
+
+	tw.appendChild(aboutVis);
+
+}
+
+function setHTMLToUpdate() {
+	
+	var cp = document.getElementById(controlID);
+	cp.innerHTML = "";
+	var txt = document.getElementById(whereToWrite);
+	txt.innerHTML = "";
+
+	// <input type="number" id="valueInput" placeholder="Value to add">
+	// <input type="number" id="indexInput" placeholder="Index to add to">
+	// <button onclick="updateOperation()">Go</button>
+
+	var valv = document.createElement("input");
+	valv.setAttribute("type", "number");
+	valv.setAttribute("id", valInputID);
+	valv.setAttribute("placeholder", "Value to add");
+
+	cp.appendChild(valv);
+
+	var indv = document.createElement("input");
+	indv.setAttribute("type", "number");
+	indv.setAttribute("id", indInputID);
+	indv.setAttribute("placeholder", "Index to add to");
+
+	cp.appendChild(indv);
+
+	var button = document.createElement("button");
+	button.setAttribute("onclick", "updateOperation()");
+	button.innerHTML = "Go";
+
+	cp.appendChild(button);
+
+}
+
+function switchStuff() {
+	var chosen = document.getElementById(selectionBar).value;
+	if (chosen == updateOption) setHTMLToUpdate();
+	if (chosen == aboutOption) setHTMLToAboutSegtree();
+
+}
+
+
+function initall() {
+	buildSegmentTree();
+	switchStuff();
 }
 

@@ -3,8 +3,6 @@
 
 <script src="segtree.js"></script>
 
-
-
 <head>
 	<meta charset="utf-8">
 
@@ -16,7 +14,7 @@
 	</title>
 </head>
 
-<body onload="buildSegmentTree()">
+<body onload="initall()">
 
 	<div>
 		<div>
@@ -24,17 +22,28 @@
 		</div>
 
 		<div>
-			
-			<div>
-
-				<input type="number" id="valueInput" placeholder="Value to add">
-				<input type="number" id="indexInput" placeholder="Index to add to">
-				<button onclick="updateOperation()">Go</button>
-				
+			<div class="uidiv">
+				Point Update/Range Query
+			</div>
+			<div class="uidiv">
+				<select name="Information" onchange="switchStuff()" id="selectionBar">
+					<option value="about">About</option>
+					<option value="update">Point Update</option>
+					<option value="query">Range Query</option>
+				</select>
 			</div>
 		</div>
 
+		<div id="controls" class="uidiv"></div>
+
+
+
 	</div>
+	
+	<div class="uidiv">
+		<p id="outputText"></p>
+	</div>
+	
 
 </body>
 </html>

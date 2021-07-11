@@ -980,7 +980,7 @@ select {
 	border: 1px solid #bbb;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
-	height: 3em;
+	height: 1.5em;
 	max-width: 100%;
 }
 
@@ -4361,15 +4361,34 @@ p > object:only-child {
 	}
 }
 
-div {
-	margin: 15px 10px 10px 10px;
-	align-content: center;
-	text-align: center;
-}
-
-button, input, label {
+button, input, label, select {
 	float: left;
 	display: inline-block;
 	margin: 3px 3px 3px 3px;
 }
+
+select {
+	font-size: 12px;
+	font-size: 0.825rem;
+}
+
+div {
+	margin: 15px 10px 10px 10px;
+	align-content: center;
+	display: block;
+}
+
+.uidiv {
+	float: left;
+	display: inline-block;
+	margin: 3px 3px 3px 3px;
+}
+
+p {
+	float: left;
+	text-align: left;
+	margin: 10px 10px 10px 10px;
+}
+
+
 
