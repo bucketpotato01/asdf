@@ -26,8 +26,9 @@ p {
 }
 
 .maindiv {
-	width: 50%;
-	margin: 0 auto;
+	width: 99%;
+	margin: auto;
+	text-align: center;
 }
 
 

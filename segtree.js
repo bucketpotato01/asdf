@@ -3,8 +3,9 @@ const nodeColor = 'white';   // color to fill the nodes with
 const nodeBorder = 'black';  // color of the borders of the nodes
 const nodeBorderWidth = 1;   // name is self-explanatory
 const nodeSize = 15;         // radius of the nodes on the svg
-const markColor = '#ffc1bd'      // the color for marking nodes
-const markWidth = 2;
+const markColor = '#ffd7d4'  // the color for marking nodes
+const markWidth = 2;         // radius of marked nodes' borders
+const queryMark = '#ffa6a6'  // color of marked queried nodes
 
 const textOffset = 4;        // make the nodes pretty
 const textSize = 'x-small'     // size of the text in the nodes
@@ -18,12 +19,15 @@ const outlineIDPrefix = "outline"; // prefix for ID of a outline
 const stVisID = "stvis";           // ID of the svg
 const valInputID = "valueInput";   // ID of the value input
 const indInputID = "indexInput";   // ID of the index input
+const lInputID = "linput";
+const rInputID = "rinput";
 const controlID = "controls";      // ID of the control panel
 const whereToWrite = "outputText"; // ID of the div to put text onto
 const selectionBar = "selectionBar";
 const aboutOption = "about";
 const queryOption = "query";
 const updateOption = "update";
+
 
 // information about the segment tree
 var arrSize = 16; // the size of the array
@@ -35,6 +39,7 @@ var maxDepth;     // the max depth of the segment tree
 
 // visualization related
 var marks = [];
+const outOfBounds = "Index out of bounds.";
 
 function vis() { return document.getElementById(stVisID); }
 
@@ -231,18 +236,74 @@ function upd(ind, toAdd) {
 
 }
 
+function tellUser(message) {
+	document.getElementById(whereToWrite).innerHTML = message;
+}
+
 function updateOperation() {
 	
-	document.getElementById(whereToWrite).innerHTML = "";
+	tellUser("");
 	var val = parseInt(document.getElementById(valInputID).value);
 	var ind = parseInt(document.getElementById(indInputID).value);
 	
 	if (isNaN(val) || isNaN(ind)) return;
-	if (ind >= arrSize) {
-		document.getElementById(whereToWrite).innerHTML = "Index out of bounds";
+	if (ind >= arrSize || ind < 0) {
+		tellUser(outOfBounds);
 		return;
 	}
 	upd(ind, val);
+
+}
+
+function markRecursive(c) {
+	mark(c);
+	if (c >= bstart) return;
+	markRecursive(c * 2 + 1);
+	markRecursive(c * 2 + 2);
+}
+
+function queryRecursive(c, cmin, cmax, minb, maxb) {
+
+	if (cmin >= minb && cmax <= maxb) {
+		mark(c, true, queryMark);
+		if (c < bstart) {
+			markRecursive(c*2+1);
+			markRecursive(c*2+2);
+		}
+		return datums[c];
+	}
+
+	if (cmin > maxb || cmax < minb) return 0;
+
+	return queryRecursive(c*2+1, cmin, Math.floor((cmin+cmax)/2), minb, maxb) +
+		   queryRecursive(c*2+2, 1+Math.floor((cmin+cmax)/2), cmax, minb, maxb);
+
+}
+
+function queryOperation() {
+
+	var l = parseInt(document.getElementById(lInputID).value);
+	var r = parseInt(document.getElementById(rInputID).value);
+	
+	if (isNaN(l) || isNaN(r)) return;
+	if (l >= arrSize || r >= arrSize || l < 0 || r < 0) {
+		tellUser(outOfBounds);
+		return;
+	}
+
+	if (l > r) {
+		tellUser("Left index should be less than right index.");
+		return;
+	}
+
+	for (var i = 0; i < marks.length; i++) {
+		mark(marks[i], false);
+	}
+	marks = [];
+
+	var res = queryRecursive(0, 0, bstart, l, r);
+
+	tellUser("Result of query is: " + res);
 
 }
 
@@ -254,7 +315,7 @@ function setHTMLToAboutSegtree() {
 
 	var purpose = document.createElement("p");
 	purpose.innerHTML = 
-	"Segment trees are used for quickly modifying and querying an array: "+
+	"Segment trees can be used for quickly modifying and querying an array: "+
 	"examples would be adding x to the value at index i, or querying the sum "+
 	"of the values between indices l and r. Doing this naively would take linear " +
 	"time for each query, but with segment trees, both operations take lg(N) time.";
@@ -265,7 +326,7 @@ function setHTMLToAboutSegtree() {
 	aboutVis.innerHTML =
 	"This visualization supports point add and range sum query operations. " +
 	"However, this basic segment tree can be modified to support other operations: " +
-	"for instance, point add/range min, point set/range sum, point add/range gcd, just to name a few.";
+	"for instance, point add/range min, point set/range sum, and point add/range gcd, just to name a few.";
 
 	tw.appendChild(aboutVis);
 
@@ -308,10 +369,44 @@ function setHTMLToUpdate() {
 
 }
 
+function setHTMLToQuery() {
+	
+	var cp = document.getElementById(controlID);
+	cp.innerHTML = "";
+	var txt = document.getElementById(whereToWrite);
+	txt.innerHTML = "";
+
+	var cdiv = document.createElement("div");
+
+	var valv = document.createElement("input");
+	valv.setAttribute("type", "number");
+	valv.setAttribute("id", lInputID);
+	valv.setAttribute("placeholder", "Left bound of query");
+
+	cdiv.appendChild(valv);
+
+	var indv = document.createElement("input");
+	indv.setAttribute("type", "number");
+	indv.setAttribute("id", rInputID);
+	indv.setAttribute("placeholder", "Right bound of query");
+
+	cdiv.appendChild(indv);
+
+	var button = document.createElement("button");
+	button.setAttribute("onclick", "queryOperation()");
+	button.innerHTML = "Go";
+
+	cdiv.appendChild(button);
+
+	cp.appendChild(cdiv);
+
+}
+
 function switchStuff() {
 	var chosen = document.getElementById(selectionBar).value;
 	if (chosen == updateOption) setHTMLToUpdate();
 	if (chosen == aboutOption) setHTMLToAboutSegtree();
+	if (chosen == queryOption) setHTMLToQuery();
 
 }
 
