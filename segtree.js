@@ -315,18 +315,13 @@ function setHTMLToAboutSegtree() {
 
 	var purpose = document.createElement("p");
 	purpose.innerHTML = 
-	"Segment trees can be used for quickly modifying and querying an array: "+
-	"examples would be adding x to the value at index i, or querying the sum "+
-	"of the values between indices l and r. Doing this naively would take linear " +
-	"time for each query, but with segment trees, both operations take lg(N) time.";
+	"Segment trees can be used for quickly modifying and querying an array in lg(N) time per operation.";
 	
 	tw.appendChild(purpose);
 
 	var aboutVis = document.createElement("p");
 	aboutVis.innerHTML =
-	"This visualization supports point add and range sum query operations. " +
-	"However, this basic segment tree can be modified to support other operations: " +
-	"for instance, point add/range min, point set/range sum, and point add/range gcd, just to name a few.";
+	"About this visualization: when updating, the nodes that are changed will be highlighted. When querying, the datums that are added to the total are highlighted in a darker color.";
 
 	tw.appendChild(aboutVis);
 
