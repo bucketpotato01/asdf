@@ -282,25 +282,29 @@ function setHTMLToUpdate() {
 	// <input type="number" id="indexInput" placeholder="Index to add to">
 	// <button onclick="updateOperation()">Go</button>
 
+	var cdiv = document.createElement("div");
+
 	var valv = document.createElement("input");
 	valv.setAttribute("type", "number");
 	valv.setAttribute("id", valInputID);
 	valv.setAttribute("placeholder", "Value to add");
 
-	cp.appendChild(valv);
+	cdiv.appendChild(valv);
 
 	var indv = document.createElement("input");
 	indv.setAttribute("type", "number");
 	indv.setAttribute("id", indInputID);
 	indv.setAttribute("placeholder", "Index to add to");
 
-	cp.appendChild(indv);
+	cdiv.appendChild(indv);
 
 	var button = document.createElement("button");
 	button.setAttribute("onclick", "updateOperation()");
 	button.innerHTML = "Go";
 
-	cp.appendChild(button);
+	cdiv.appendChild(button);
+
+	cp.appendChild(cdiv);
 
 }
 
