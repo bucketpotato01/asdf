@@ -1,3 +1,4 @@
+
 select {
 	font-size: 12px;
 	font-size: 0.825rem;
@@ -9,14 +10,7 @@ div {
 }
 
 button, input, label, select {
-	/*float: left;*/
 	display: inline-block;
-	margin: 3px 3px 3px 3px;
-}
-
-.uidiv {
-	display: inline-block;
-	/*float: left;*/
 	margin: 3px 3px 3px 3px;
 }
 
@@ -24,6 +18,16 @@ p {
 	float: left;
 	text-align: left;
 	margin: 10px 10px 10px 10px;
+}
+
+.uidiv {
+	display: inline-block;
+	margin: 3px 3px 3px 3px;
+}
+
+.maindiv {
+	width: 50%;
+	margin: 0 auto;
 }
 
 
