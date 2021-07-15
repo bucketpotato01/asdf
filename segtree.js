@@ -28,213 +28,216 @@ const aboutOption = "about";
 const queryOption = "query";
 const updateOption = "update";
 
+class Segtree {
 
-// information about the segment tree
-var arrSize = 16; // the size of the array
-var stsize;       // the total size of the segment tree
-var bstart;       // (stsize + 1) / 2 - 1
-var datums = [];  // stores the segment tree
-var paredge = []; // the ids of the edges to a node's parents
-var maxDepth;     // the max depth of the segment tree
+	constructor(id) {
 
-// visualization related
-var marks = [];
-const outOfBounds = "Index out of bounds.";
+		this.id = id;
+		this.arrSize = 16;
 
-function vis() { return document.getElementById(stVisID); }
+		this.bstart = 1;
+		this.maxDepth = 0;
+		while (this.bstart < this.arrSize) {
+			this.bstart *= 2;
+			this.maxDepth += 1;
+		}
+		this.stsize = this.bstart * 2 - 1;
+		this.bstart -= 1;
 
-// adds a node to the svg
-function createNode(x, y, val, currID) {
+		this.datums = [];
+		this.paredge = [];
+		this.marks = [];
+		this.vis().innerHTML = "";
 
-	var displayNode = document.createElement('g');
+		for (var i = 0; i < this.stsize; i++) {
+			this.datums.push(0);
+			this.paredge.push(i);
+		}
 
-	var circle = document.createElement('circle');
-	circle.setAttribute('cx', x);
-	circle.setAttribute('cy', y);
-	circle.setAttribute('r', nodeSize);
-	circle.setAttribute('stroke', nodeBorder);
-	circle.setAttribute('stroke-width', nodeBorderWidth);
-	circle.setAttribute('fill', nodeColor);
-	circle.setAttribute('id', outlineIDPrefix + currID);
-	displayNode.appendChild(circle);
+		this.drawRecursive(0, 0, 0);
 
-	var temp = document.createElement('text');
-	temp.setAttribute('x', x);
-	temp.setAttribute('y', y + textOffset);
-	temp.setAttribute('text-anchor', 'middle');
-	temp.setAttribute('font-size', textSize);
-	temp.setAttribute('id', textIDPrefix + currID);
-	temp.innerHTML = val;
-	displayNode.appendChild(temp);
-
-	// displayNode.innerHTML += createText(x, y, val);
-	displayNode.setAttribute('id', nodeIdPrefix + currID);
-
-	vis().appendChild(displayNode);
-	vis().innerHTML += "";
-
-}
-
-// removes the specified element from the svg
-function removeFromDoc(id) { document.getElementById(id).remove(); }
-
-// takes in the depth and the position of the node at that depth
-// returns the x/y coordinates
-// finished - if not finished, moves the node up a bit
-function getCoords(dep, which, finished = true) {
-
-	var numnodes = 2 ** dep;
-
-	var canvasWidth = document.getElementById(stVisID).width.animVal.value;
-	var canvasHeight = document.getElementById(stVisID).height.animVal.value;
-
-	var nv = numnodes + 1;
-	var x = (canvasWidth / nv) * (which + 1);
-	var y = (canvasHeight / (maxDepth + 2)) * (dep + 1);
-
-	if (finished == false)
-		y -= unfinishedOffset;
-
-	return [x, y];
-
-}
-
-// moves the specified element by the specified x and y
-function moveThing(id, x, y) {
-
-	var container = document.getElementById(nodeIdPrefix + id);
-	if (container == null) return;
-	var transformNode = 'translate(' + x + ',' + y + ')';
-	container.setAttribute('transform', transformNode);
-
-}
-
-// geometry - a point dToWalk away from coords in the direction towards goal
-function walkTo(coords, goal, dToWalk) {
-	var tdist = ((goal[1] - coords[1])**2 + (goal[0] - coords[0])**2) ** 0.5;
-	var xratio = (goal[0] - coords[0]) / tdist;
-	var cdx = xratio * dToWalk;
-	var yratio = (goal[1] - coords[1]) / tdist;
-	var cdy = yratio * dToWalk;
-	return [coords[0] + cdx, coords[1] + cdy];
-}
-
-// creates an edge between two nodes
-function makeLine(pd, pa, cd, ca, id) {
-	if (pd == -1 || pa == -1) return false;
-	if (cd == -1 || ca == -1) return false;
-	var par = getCoords(pd, pa);
-	var cur = getCoords(cd, ca);
-
-	var temp1 = walkTo(par, cur, nodeSize);
-	var temp2 = walkTo(cur, par, nodeSize);
-
-	par = temp1;
-	cur = temp2;
-
-	var cline = document.createElement('line');
-	cline.setAttribute('x1', par[0]);
-	cline.setAttribute('y1', par[1]);
-	cline.setAttribute('x2', cur[0]);
-	cline.setAttribute('y2', cur[1]);
-	cline.setAttribute('id', edgeIDPrefix + id);
-	cline.setAttribute('stroke-width', 1);
-	cline.setAttribute('stroke', 'black');
-	vis().appendChild(cline);
-	vis().innerHTML += "";
-	return true;
-}
-
-// recursively draws the segment tree
-function drawRecursive(c, cdep, cacross) {
-
-	var ccoords = getCoords(cdep, cacross);
-	createNode(ccoords[0], ccoords[1], datums[c], c);
-
-	if (c >= bstart) return;
-
-	var a1 = cacross * 2;
-	var a2 = cacross * 2 + 1;
-
-	var c1c = getCoords(cdep + 1, a1);
-	var c2c = getCoords(cdep + 1, a2);
-
-	makeLine(cdep, cacross, cdep + 1, a1, paredge[c * 2 + 1]);
-	makeLine(cdep, cacross, cdep + 1, a2, paredge[c * 2 + 2]);
-
-	drawRecursive(c*2+1, cdep + 1, a1);
-	drawRecursive(c*2+2, cdep + 1, a2);
-
-}
-
-// build the segment tree, based on the current array size.
-function buildSegmentTree() {
-
-	bstart = 1;
-	maxDepth = 0;
-	while (bstart < arrSize) {
-		bstart *= 2;
-		maxDepth += 1;
-	}
-	stsize = bstart * 2 - 1;
-	bstart -= 1;
-
-	datums = [];
-	paredge = [];
-	vis().innerHTML = "";
-
-	for (var i = 0; i < stsize; i++) {
-		datums.push(0);
-		paredge.push(i);
 	}
 
-	drawRecursive(0, 0, 0);
+	vis() { return document.getElementById(this.id); }
 
-}
+	createNode(x, y, val, currID) {
 
+		var displayNode = document.createElement('g');
 
+		var circle = document.createElement('circle');
+		circle.setAttribute('cx', x);
+		circle.setAttribute('cy', y);
+		circle.setAttribute('r', nodeSize);
+		circle.setAttribute('stroke', nodeBorder);
+		circle.setAttribute('stroke-width', nodeBorderWidth);
+		circle.setAttribute('fill', nodeColor);
+		circle.setAttribute('id', this.id + outlineIDPrefix + currID);
+		displayNode.appendChild(circle);
 
-// marks a node, appends the mark to the marks array
-function mark(ind, domark = true, whatColor = markColor) {
+		var temp = document.createElement('text');
+		temp.setAttribute('x', x);
+		temp.setAttribute('y', y + textOffset);
+		temp.setAttribute('text-anchor', 'middle');
+		temp.setAttribute('font-size', textSize);
+		temp.setAttribute('id', this.id + textIDPrefix + currID);
+		temp.innerHTML = val;
+		displayNode.appendChild(temp);
 
-	var outline = document.getElementById(outlineIDPrefix + ind);
-	if (domark == true) {
-		outline.setAttribute('fill', whatColor);
-		outline.setAttribute('stroke-width', markWidth);
-		marks.push(ind);
-	}
-	else {
-		outline.setAttribute('fill', nodeColor);
-		outline.setAttribute('stroke-width', nodeBorderWidth);
-	}
+		displayNode.setAttribute('id', this.id + nodeIdPrefix + currID);
 
-}
+		this.vis().appendChild(displayNode);
+		this.vis().innerHTML += "";
 
-// sets the value at index ind to v
-function set(ind, v) {
-
-	datums[ind] = v;
-	var text = document.getElementById(textIDPrefix + ind);
-	text.innerHTML = v;
-
-}
-
-function upd(ind, toAdd) {
-	for (var i = 0; i < marks.length; i++) {
-		mark(marks[i], false);
-	}
-	marks = [];
-
-	var cind = ind + bstart;
-	while (cind >= 0) {
-		mark(cind);
-		set(cind, datums[cind] + toAdd);
-		if (cind == 0) break;
-		cind = Math.floor((cind - 1) / 2);
-		
 	}
 
+	getCoords(dep, which) {
+
+		var numnodes = 2 ** dep;
+
+		var canvasWidth = this.vis().width.animVal.value;
+		var canvasHeight = this.vis().height.animVal.value;
+
+		var nv = numnodes + 1;
+		var x = (canvasWidth / nv) * (which + 1);
+		var y = (canvasHeight / (this.maxDepth + 2)) * (dep + 1);
+
+		return [x, y];
+
+	}
+
+	walkTo(coords, goal, dToWalk) {
+		var tdist = ((goal[1] - coords[1])**2 + (goal[0] - coords[0])**2) ** 0.5;
+		var xratio = (goal[0] - coords[0]) / tdist;
+		var cdx = xratio * dToWalk;
+		var yratio = (goal[1] - coords[1]) / tdist;
+		var cdy = yratio * dToWalk;
+		return [coords[0] + cdx, coords[1] + cdy];
+	}
+
+	makeLine(pd, pa, cd, ca, id) {
+		if (pd == -1 || pa == -1) return false;
+		if (cd == -1 || ca == -1) return false;
+		var par = this.getCoords(pd, pa);
+		var cur = this.getCoords(cd, ca);
+
+		var temp1 = this.walkTo(par, cur, nodeSize);
+		var temp2 = this.walkTo(cur, par, nodeSize);
+
+		par = temp1;
+		cur = temp2;
+
+		var cline = document.createElement('line');
+		cline.setAttribute('x1', par[0]);
+		cline.setAttribute('y1', par[1]);
+		cline.setAttribute('x2', cur[0]);
+		cline.setAttribute('y2', cur[1]);
+		cline.setAttribute('id', this.id + edgeIDPrefix + id);
+		cline.setAttribute('stroke-width', 1);
+		cline.setAttribute('stroke', 'black');
+		this.vis().appendChild(cline);
+		this.vis().innerHTML += "";
+		return true;
+	}
+
+	drawRecursive(c, cdep, cacross) {
+
+		var ccoords = this.getCoords(cdep, cacross);
+		this.createNode(ccoords[0], ccoords[1], this.datums[c], c);
+
+		if (c >= this.bstart) return;
+
+		var a1 = cacross * 2;
+		var a2 = cacross * 2 + 1;
+
+		var c1c = this.getCoords(cdep + 1, a1);
+		var c2c = this.getCoords(cdep + 1, a2);
+
+		this.makeLine(cdep, cacross, cdep + 1, a1, this.paredge[c * 2 + 1]);
+		this.makeLine(cdep, cacross, cdep + 1, a2, this.paredge[c * 2 + 2]);
+
+		this.drawRecursive(c*2+1, cdep + 1, a1);
+		this.drawRecursive(c*2+2, cdep + 1, a2);
+
+	}
+
+	mark(ind, domark = true, whatColor = markColor) {
+
+		var outline = document.getElementById(this.id + outlineIDPrefix + ind);
+		if (domark == true) {
+			outline.setAttribute('fill', whatColor);
+			outline.setAttribute('stroke-width', markWidth);
+			this.marks.push(ind);
+		}
+		else {
+			outline.setAttribute('fill', nodeColor);
+			outline.setAttribute('stroke-width', nodeBorderWidth);
+		}
+
+	}
+
+	set(ind, v) {
+
+		this.datums[ind] = v;
+		var text = document.getElementById(this.id + textIDPrefix + ind);
+		text.innerHTML = v;
+
+	}
+
+	unmarkall() {
+
+		for (var i = 0; i < this.marks.length; i++) {
+			this.mark(this.marks[i], false);
+		}
+		this.marks = [];
+
+	}
+
+	upd(ind, toAdd) {
+
+		this.unmarkall();
+
+		var cind = ind + this.bstart;
+		while (cind >= 0) {
+			this.mark(cind);
+			this.set(cind, this.datums[cind] + toAdd);
+			if (cind == 0) break;
+			cind = Math.floor((cind - 1) / 2);
+			
+		}
+
+	}
+
+	markRecursive(c) {
+		this.mark(c);
+		if (c >= this.bstart) return;
+		this.markRecursive(c * 2 + 1);
+		this.markRecursive(c * 2 + 2);
+	}
+
+	queryRecursive(c, cmin, cmax, minb, maxb) {
+
+		if (cmin >= minb && cmax <= maxb) {
+			this.mark(c, true, queryMark);
+			if (c < this.bstart) {
+				this.markRecursive(c*2+1);
+				this.markRecursive(c*2+2);
+			}
+			return this.datums[c];
+		}
+
+		if (cmin > maxb || cmax < minb) return 0;
+
+		return this.queryRecursive(c*2+1, cmin, Math.floor((cmin+cmax)/2), minb, maxb) +
+			   this.queryRecursive(c*2+2, 1+Math.floor((cmin+cmax)/2), cmax, minb, maxb);
+
+	}
+
+	query(lo, hi) {
+		this.queryRecursive(0, 0, this.bstart, lo, hi);
+	}
 }
+
+var mainSegtree;
 
 function tellUser(message) {
 	document.getElementById(whereToWrite).innerHTML = message;
@@ -247,36 +250,11 @@ function updateOperation() {
 	var ind = parseInt(document.getElementById(indInputID).value);
 	
 	if (isNaN(val) || isNaN(ind)) return;
-	if (ind >= arrSize || ind < 0) {
+	if (ind >= mainSegtree.arrSize || ind < 0) {
 		tellUser(outOfBounds);
 		return;
 	}
-	upd(ind, val);
-
-}
-
-function markRecursive(c) {
-	mark(c);
-	if (c >= bstart) return;
-	markRecursive(c * 2 + 1);
-	markRecursive(c * 2 + 2);
-}
-
-function queryRecursive(c, cmin, cmax, minb, maxb) {
-
-	if (cmin >= minb && cmax <= maxb) {
-		mark(c, true, queryMark);
-		if (c < bstart) {
-			markRecursive(c*2+1);
-			markRecursive(c*2+2);
-		}
-		return datums[c];
-	}
-
-	if (cmin > maxb || cmax < minb) return 0;
-
-	return queryRecursive(c*2+1, cmin, Math.floor((cmin+cmax)/2), minb, maxb) +
-		   queryRecursive(c*2+2, 1+Math.floor((cmin+cmax)/2), cmax, minb, maxb);
+	mainSegtree.upd(ind, val);
 
 }
 
@@ -286,7 +264,7 @@ function queryOperation() {
 	var r = parseInt(document.getElementById(rInputID).value);
 	
 	if (isNaN(l) || isNaN(r)) return;
-	if (l >= arrSize || r >= arrSize || l < 0 || r < 0) {
+	if (l >= mainSegtree.arrSize || r >= mainSegtree.arrSize || l < 0 || r < 0) {
 		tellUser(outOfBounds);
 		return;
 	}
@@ -296,12 +274,9 @@ function queryOperation() {
 		return;
 	}
 
-	for (var i = 0; i < marks.length; i++) {
-		mark(marks[i], false);
-	}
-	marks = [];
+	mainSegtree.unmarkall();
 
-	var res = queryRecursive(0, 0, bstart, l, r);
+	var res = mainSegtree.query(l, r);
 
 	tellUser("Result of query is: " + res);
 
@@ -333,10 +308,6 @@ function setHTMLToUpdate() {
 	cp.innerHTML = "";
 	var txt = document.getElementById(whereToWrite);
 	txt.innerHTML = "";
-
-	// <input type="number" id="valueInput" placeholder="Value to add">
-	// <input type="number" id="indexInput" placeholder="Index to add to">
-	// <button onclick="updateOperation()">Go</button>
 
 	var cdiv = document.createElement("div");
 
@@ -402,12 +373,15 @@ function switchStuff() {
 	if (chosen == updateOption) setHTMLToUpdate();
 	if (chosen == aboutOption) setHTMLToAboutSegtree();
 	if (chosen == queryOption) setHTMLToQuery();
-
 }
-
 
 function initall() {
-	buildSegmentTree();
+
 	switchStuff();
+	mainSegtree = new Segtree(stVisID);
+
+
 }
+
+
 
