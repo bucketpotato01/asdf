@@ -251,7 +251,7 @@ function updateOperation() {
 	
 	if (isNaN(val) || isNaN(ind)) return;
 	if (ind >= mainSegtree.arrSize || ind < 0) {
-		tellUser(outOfBounds);
+		tellUser("Index out of bounds");
 		return;
 	}
 	mainSegtree.upd(ind, val);
@@ -265,7 +265,7 @@ function queryOperation() {
 	
 	if (isNaN(l) || isNaN(r)) return;
 	if (l >= mainSegtree.arrSize || r >= mainSegtree.arrSize || l < 0 || r < 0) {
-		tellUser(outOfBounds);
+		tellUser("Index out of bounds");
 		return;
 	}
 
