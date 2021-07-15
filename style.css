@@ -4361,16 +4361,19 @@ p > object:only-child {
 }
 
 select {
+	display: inline-block;
+	margin: 3px 3px 3px 3px;
 	font-size: 12px;
 	font-size: 0.825rem;
 }
 
 div {
-	margin: 15px 10px 10px 10px;
+	/*margin: 15px 10px 10px 10px;*/
+	margin: 5px 5px 5px 5px;
 	display: block;
 }
 
-button, input, label, select {
+button, input, label {
 	display: inline-block;
 	float: left;
 	margin: 3px 3px 3px 3px;
