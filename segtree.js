@@ -1,15 +1,14 @@
 
-const nodeColor = 'white';   // color to fill the nodes with
-const nodeBorder = 'black';  // color of the borders of the nodes
-const nodeBorderWidth = 1;   // name is self-explanatory
-const nodeSize = 15;         // radius of the nodes on the svg
-const markColor = '#ffd7d4'  // the color for marking nodes
-const markWidth = 2;         // radius of marked nodes' borders
-const queryMark = '#ffa6a6'  // color of marked queried nodes
+var nodeColor = '#ffffff';   // color to fill the nodes with
+var nodeBorder = '#000000';  // color of the borders of the nodes
+var nodeBorderWidth = 1;   // name is self-explanatory
+var nodeSize = 15;         // radius of the nodes on the svg
+var markColor = '#ffd7d4'  // the color for marking nodes
+var markWidth = 2;         // radius of marked nodes' borders
+var queryMark = '#ffa6a6'  // color of marked queried nodes
 
-const textOffset = 4;        // make the nodes pretty
-const textSize = 'x-small'     // size of the text in the nodes
-const maxDatumValue = 99;    // maximum absolute value of values in the segment tree
+var textOffset = nodeSize / 4;  // make the nodes pretty
+var textSize = 'x-small'        // size of the text in the nodes
 
 // helpful for working with IDs in the html file
 const nodeIdPrefix = "stVisNode";  // prefix for the ID of a node on the svg
@@ -27,6 +26,7 @@ const selectionBar = "selectionBar";
 const aboutOption = "about";
 const queryOption = "query";
 const updateOption = "update";
+const settingsOption = "settings";
 
 class Segtree {
 
@@ -54,7 +54,7 @@ class Segtree {
 			this.paredge.push(i);
 		}
 
-		this.drawRecursive(0, 0, 0);
+		this.redraw();
 
 	}
 
@@ -160,6 +160,11 @@ class Segtree {
 
 	}
 
+	redraw() {
+		this.vis().innerHTML = "";
+		this.drawRecursive(0, 0, 0);
+	}
+
 	mark(ind, domark = true, whatColor = markColor) {
 
 		var outline = document.getElementById(this.id + outlineIDPrefix + ind);
@@ -233,153 +238,223 @@ class Segtree {
 	}
 
 	query(lo, hi) {
-		this.queryRecursive(0, 0, this.bstart, lo, hi);
+		return this.queryRecursive(0, 0, this.bstart, lo, hi);
 	}
 }
 
-var mainSegtree;
 
-function tellUser(message) {
-	document.getElementById(whereToWrite).innerHTML = message;
-}
+class UserInteraction {
 
-function updateOperation() {
-	
-	tellUser("");
-	var val = parseInt(document.getElementById(valInputID).value);
-	var ind = parseInt(document.getElementById(indInputID).value);
-	
-	if (isNaN(val) || isNaN(ind)) return;
-	if (ind >= mainSegtree.arrSize || ind < 0) {
-		tellUser("Index out of bounds");
-		return;
-	}
-	mainSegtree.upd(ind, val);
-
-}
-
-function queryOperation() {
-
-	var l = parseInt(document.getElementById(lInputID).value);
-	var r = parseInt(document.getElementById(rInputID).value);
-	
-	if (isNaN(l) || isNaN(r)) return;
-	if (l >= mainSegtree.arrSize || r >= mainSegtree.arrSize || l < 0 || r < 0) {
-		tellUser("Index out of bounds");
-		return;
+	constructor(ms) {
+		this.segtree = ms;
 	}
 
-	if (l > r) {
-		tellUser("Left index should be less than right index.");
-		return;
+	tellUser(message) {
+		document.getElementById(whereToWrite).innerHTML = message;
 	}
 
-	mainSegtree.unmarkall();
+	updateOperation() {
+		
+		this.tellUser("");
+		var val = parseInt(document.getElementById(valInputID).value);
+		var ind = parseInt(document.getElementById(indInputID).value);
+		
+		if (isNaN(val) || isNaN(ind)) return;
+		if (ind >= this.segtree.arrSize || ind < 0) {
+			this.tellUser("Index out of bounds");
+			return;
+		}
+		this.segtree.upd(ind, val);
 
-	var res = mainSegtree.query(l, r);
+	}
 
-	tellUser("Result of query is: " + res);
+	queryOperation() {
+
+		var l = parseInt(document.getElementById(lInputID).value);
+		var r = parseInt(document.getElementById(rInputID).value);
+		
+		if (isNaN(l) || isNaN(r)) return;
+		if (l >= this.segtree.arrSize || r >= this.segtree.arrSize || l < 0 || r < 0) {
+			this.tellUser("Index out of bounds");
+			return;
+		}
+
+		if (l > r) {
+			this.tellUser("Left index should be less than right index.");
+			return;
+		}
+
+		this.segtree.unmarkall();
+
+		var res = this.segtree.query(l, r);
+
+		this.tellUser("Result of query is: " + res);
+
+	}
+
+	resetAll() {
+		var cp = document.getElementById(controlID);
+		cp.innerHTML = "";
+		var txt = document.getElementById(whereToWrite);
+		txt.innerHTML = "";
+	}
+
+	setHTMLToAboutSegtree() {
+		
+		this.resetAll();
+
+		var tw = document.getElementById(whereToWrite);
+
+		document.getElementById(controlID).innerHTML = "";
+
+		var purpose = document.createElement("p");
+		purpose.innerHTML = 
+		"Segment trees can be used for quickly modifying and querying an array in lg(N) time per operation.";
+		
+		tw.appendChild(purpose);
+
+		var aboutVis = document.createElement("p");
+		aboutVis.innerHTML =
+		"About this visualization: when updating, the nodes that are changed will be highlighted. When querying, the datums that are added to the total are highlighted in a darker color.";
+
+		tw.appendChild(aboutVis);
+
+	}
+
+	setHTMLToUpdate() {
+		
+		this.resetAll();
+		var cp = document.getElementById(controlID);
+
+		var cdiv = document.createElement("div");
+
+		var valv = document.createElement("input");
+		valv.setAttribute("type", "number");
+		valv.setAttribute("id", valInputID);
+		valv.setAttribute("placeholder", "Value to add");
+
+		cdiv.appendChild(valv);
+
+		var indv = document.createElement("input");
+		indv.setAttribute("type", "number");
+		indv.setAttribute("id", indInputID);
+		indv.setAttribute("placeholder", "Index to add to");
+
+		cdiv.appendChild(indv);
+
+		var button = document.createElement("button");
+		button.setAttribute("onclick", "interaction.updateOperation()");
+		button.innerHTML = "Go";
+
+		cdiv.appendChild(button);
+
+		cp.appendChild(cdiv);
+
+	}
+
+	setHTMLToQuery() {
+		
+		this.resetAll();
+		var cp = document.getElementById(controlID);
+
+		var cdiv = document.createElement("div");
+
+		var valv = document.createElement("input");
+		valv.setAttribute("type", "number");
+		valv.setAttribute("id", lInputID);
+		valv.setAttribute("placeholder", "Left bound of query");
+
+		cdiv.appendChild(valv);
+
+		var indv = document.createElement("input");
+		indv.setAttribute("type", "number");
+		indv.setAttribute("id", rInputID);
+		indv.setAttribute("placeholder", "Right bound of query");
+
+		cdiv.appendChild(indv);
+
+		var button = document.createElement("button");
+		button.setAttribute("onclick", "interaction.queryOperation()");
+		button.innerHTML = "Go";
+
+		cdiv.appendChild(button);
+
+		cp.appendChild(cdiv);
+
+	}
+
+	setoptions() {
+		var coloroptions = [
+			["Node Fill", nodeColor],
+			["Node Border", nodeBorder],
+			["Mark Color 1", markColor],
+			["Mark Color 2", queryMark]
+		]
+			
+		nodeColor = document.getElementById(coloroptions[0][0]).value;
+		nodeBorder = document.getElementById(coloroptions[1][0]).value;
+		markColor = document.getElementById(coloroptions[2][0]).value;
+		queryMark = document.getElementById(coloroptions[3][0]).value;
+		
+		this.segtree.redraw();
+
+	}
+
+	setHTMLToSettings() {
+
+		this.resetAll();
+
+		var cp = document.getElementById(controlID);
+		var dcolors = document.createElement("div");
+
+		var coloroptions = [
+			["Node Fill", nodeColor],
+			["Node Border", nodeBorder],
+			["Mark Color 1", markColor],
+			["Mark Color 2", queryMark]
+		]
+
+		for (var i = 0; i < coloroptions.length; i++) {
+			var wone = document.createElement("label");
+			wone.innerHTML = coloroptions[i][0];
+			var cin = document.createElement("input");
+			cin.setAttribute("type", "color");
+			cin.setAttribute("value", coloroptions[i][1]);
+			cin.setAttribute("placeholder", coloroptions[i]);
+			cin.setAttribute("id", coloroptions[i][0]);
+			dcolors.appendChild(wone);
+			dcolors.appendChild(cin);
+		}
+
+		var odiv = document.createElement("div");
+		var butt = document.createElement("button");
+		butt.innerHTML = "Save";
+		butt.setAttribute("onclick", "interaction.setoptions()");
+		odiv.appendChild(butt);
+
+		cp.appendChild(dcolors);
+		cp.appendChild(odiv);
+
+
+	}
 
 }
 
-function setHTMLToAboutSegtree() {
-	var tw = document.getElementById(whereToWrite);
-	tw.innerHTML = "";
 
-	document.getElementById(controlID).innerHTML = "";
-
-	var purpose = document.createElement("p");
-	purpose.innerHTML = 
-	"Segment trees can be used for quickly modifying and querying an array in lg(N) time per operation.";
-	
-	tw.appendChild(purpose);
-
-	var aboutVis = document.createElement("p");
-	aboutVis.innerHTML =
-	"About this visualization: when updating, the nodes that are changed will be highlighted. When querying, the datums that are added to the total are highlighted in a darker color.";
-
-	tw.appendChild(aboutVis);
-
-}
-
-function setHTMLToUpdate() {
-	
-	var cp = document.getElementById(controlID);
-	cp.innerHTML = "";
-	var txt = document.getElementById(whereToWrite);
-	txt.innerHTML = "";
-
-	var cdiv = document.createElement("div");
-
-	var valv = document.createElement("input");
-	valv.setAttribute("type", "number");
-	valv.setAttribute("id", valInputID);
-	valv.setAttribute("placeholder", "Value to add");
-
-	cdiv.appendChild(valv);
-
-	var indv = document.createElement("input");
-	indv.setAttribute("type", "number");
-	indv.setAttribute("id", indInputID);
-	indv.setAttribute("placeholder", "Index to add to");
-
-	cdiv.appendChild(indv);
-
-	var button = document.createElement("button");
-	button.setAttribute("onclick", "updateOperation()");
-	button.innerHTML = "Go";
-
-	cdiv.appendChild(button);
-
-	cp.appendChild(cdiv);
-
-}
-
-function setHTMLToQuery() {
-	
-	var cp = document.getElementById(controlID);
-	cp.innerHTML = "";
-	var txt = document.getElementById(whereToWrite);
-	txt.innerHTML = "";
-
-	var cdiv = document.createElement("div");
-
-	var valv = document.createElement("input");
-	valv.setAttribute("type", "number");
-	valv.setAttribute("id", lInputID);
-	valv.setAttribute("placeholder", "Left bound of query");
-
-	cdiv.appendChild(valv);
-
-	var indv = document.createElement("input");
-	indv.setAttribute("type", "number");
-	indv.setAttribute("id", rInputID);
-	indv.setAttribute("placeholder", "Right bound of query");
-
-	cdiv.appendChild(indv);
-
-	var button = document.createElement("button");
-	button.setAttribute("onclick", "queryOperation()");
-	button.innerHTML = "Go";
-
-	cdiv.appendChild(button);
-
-	cp.appendChild(cdiv);
-
-}
+var interaction;
 
 function switchStuff() {
 	var chosen = document.getElementById(selectionBar).value;
-	if (chosen == updateOption) setHTMLToUpdate();
-	if (chosen == aboutOption) setHTMLToAboutSegtree();
-	if (chosen == queryOption) setHTMLToQuery();
+	if (chosen == updateOption) interaction.setHTMLToUpdate();
+	if (chosen == aboutOption) interaction.setHTMLToAboutSegtree();
+	if (chosen == queryOption) interaction.setHTMLToQuery();
+	if (chosen == settingsOption) interaction.setHTMLToSettings();
 }
 
 function initall() {
 
+	interaction = new UserInteraction( new Segtree(stVisID) );
 	switchStuff();
-	mainSegtree = new Segtree(stVisID);
-
 
 }
 

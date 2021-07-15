@@ -4393,5 +4393,8 @@ p {
 	text-align: center;
 }
 
-
+.regdiv {
+	margin: 15px 10px 10px 10px;
+	display: table;
+}
 
