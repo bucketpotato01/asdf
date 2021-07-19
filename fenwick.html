@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<script src="fenwick.js"></script>
+
+<head>
+	<meta charset="utf-8">
+
+	<link rel="stylesheet" href="style.css">
+
+
+	<title>
+		Fenwick Tree
+	</title>
+</head>
+
+<body onload="initall()">
+
+	<div>
+		<div class="maindiv">
+			<svg id=bitvis width="512" height="512"></svg>
+		</div>
+		
+		<div class="regdiv">
+			<div class="regdiv">
+				<div class="uidiv">
+					Select: 
+				</div>
+				<div class="uidiv">
+					<select name="Information" onchange="switchStuff()" id="selectionBar">
+						<option value="update">Point Update</option>
+						<option value="query">Prefix Query</option>
+						<option value="about">About</option>
+						<option value="settings">Settings</option>
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<div id="controls" class="regdiv">
+			
+		</div>
+
+
+
+	</div>
+	
+	<div class="uidiv">
+		<p id="outputText"></p>
+	</div>
+	
+
+</body>
+</html>
