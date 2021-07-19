@@ -28,6 +28,7 @@ const queryOption = "query";
 const updateOption = "update";
 const settingsOption = "settings";
 
+// test
 class Segtree {
 
 	constructor(id) {
