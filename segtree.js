@@ -28,7 +28,11 @@ const queryOption = "query";
 const updateOption = "update";
 const settingsOption = "settings";
 
-// test
+const aboutText = `You are given an array, and you should be able to modify elements and find the sum of a range in the array. Segment trees accomplish this in logarithmic time per operation by breaking the array into segments of size 1, 2, 4, 8, etc.
+Update operations: there are at most lg(N) nodes that cover one index. Traversing the tree from the element at the bottom  up to the top and updating each node along the way will be enough to update.
+Query operations: because of the way the tree is organized, each range is split into at most 2 segments of each length, so at most 2 * lg(N) nodes are queried.
+About the visualization: for update operations, the nodes that are modified at each step are highlighted. For query operations, all nodes in the range queried are highlighted, but only the nodes that are added to the total are highlighted a darker color.`;
+
 class Segtree {
 
 	constructor(id) {
@@ -49,6 +53,7 @@ class Segtree {
 		this.paredge = [];
 		this.marks = [];
 		this.vis().innerHTML = "";
+
 
 		for (var i = 0; i < this.stsize; i++) {
 			this.datums.push(0);
@@ -94,6 +99,8 @@ class Segtree {
 	getCoords(dep, which) {
 
 		var numnodes = 2 ** dep;
+
+		console.log(this.vis());
 
 		var canvasWidth = this.vis().width.animVal.value;
 		var canvasHeight = this.vis().height.animVal.value;
@@ -300,25 +307,37 @@ class UserInteraction {
 		txt.innerHTML = "";
 	}
 
+	addText(where, what) {
+
+		var newp = document.createElement("p");
+		newp.innerHTML = what;
+		document.getElementById(where).appendChild(newp);
+
+	}
+
 	setHTMLToAboutSegtree() {
 		
 		this.resetAll();
 
-		var tw = document.getElementById(whereToWrite);
-
+		var ts = document.getElementById(whereToWrite);
 		document.getElementById(controlID).innerHTML = "";
 
-		var purpose = document.createElement("p");
-		purpose.innerHTML = 
-		"Segment trees can be used for quickly modifying and querying an array in lg(N) time per operation.";
-		
-		tw.appendChild(purpose);
+		var texttowrite = aboutText.split("\n");
 
-		var aboutVis = document.createElement("p");
-		aboutVis.innerHTML =
-		"About this visualization: when updating, the nodes that are changed will be highlighted. When querying, the datums that are added to the total are highlighted in a darker color.";
+		this.addText(whereToWrite, texttowrite[0]);
+		this.addText(whereToWrite, texttowrite[1]);
 
-		tw.appendChild(aboutVis);
+		ts.innerHTML += "<div class='maindiv'><svg id=uexsvg width='512' height='512'></svg></div>";
+		var uexst = new Segtree("uexsvg");
+		uexst.upd(3, 0);
+
+		this.addText(whereToWrite, texttowrite[2]);
+
+		ts.innerHTML += "<div class='maindiv'><svg id=qexsvg width='512' height='512'></svg></div>";
+		var uexst = new Segtree("qexsvg");
+		uexst.query(1, 14);
+
+		this.addText(whereToWrite, texttowrite[3]);
 
 	}
 
@@ -440,6 +459,7 @@ class UserInteraction {
 	}
 
 }
+
 
 
 var interaction;
