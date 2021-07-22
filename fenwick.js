@@ -30,8 +30,8 @@ const settingsOption = "settings";
 
 const infoIDPrefix = "onclickInfo";
 const popupTextSize = 'x-small';
-const popupWidth = 100;
-const popupHeight = 50;
+const popupWidth = 150;
+const popupHeight = 30;
 const popupFill = '#e6e6e6';
 const popupBorder = '#000000';
 const popupBorderWidth = 1;
@@ -122,6 +122,15 @@ class Fenwick {
 
 	vis() { return document.getElementById(this.id); }
 
+	toBinaryString(num) {
+		var res = "";
+		while (num > 0) {
+			res = (num % 2) + res;
+			num = Math.floor(num / 2);
+		}
+		return res;
+	}
+
 	createNode(x, y, val, currID) {
 
 		var displayNode = document.createElement('g');
@@ -148,6 +157,9 @@ class Fenwick {
 		displayNode.setAttribute('id', this.id + nodeIdPrefix + currID);
 
 		var infoText = "Covers [" + (currID - (currID & (-currID)) + 1) + ", " + currID + "]";
+		infoText = this.toBinaryString(currID) + ": " + infoText;
+
+		// console.log(infoText);
 
 		if (currID == 0)
 			infoText = "Not actually used";
