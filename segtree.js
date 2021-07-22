@@ -53,8 +53,12 @@ function addlabel(svgid, x, y, whatToWrite, nodeInd) {
 	popup.setAttribute('id', infoIDPrefix + svgid);
 	popup.setAttribute('ind', nodeInd);
 
+	var curroffset = 0;
+	if (x + popupWidth > document.getElementById(svgid).width.animVal.value)
+		curroffset = -popupWidth;
+	
 	var bg = document.createElement('rect');
-	bg.setAttribute('x', x);
+	bg.setAttribute('x', x + curroffset);
 	bg.setAttribute('y', y - popupHeight);
 	bg.setAttribute('width', popupWidth);
 	bg.setAttribute('height', popupHeight);
@@ -68,7 +72,7 @@ function addlabel(svgid, x, y, whatToWrite, nodeInd) {
 
 	var s = document.createElement('text');
 
-	s.setAttribute('x', x + popupWidth / 2);
+	s.setAttribute('x', x + popupWidth / 2 + curroffset);
 	s.setAttribute('y', y - popupHeight / 2.5);
 	s.setAttribute('text-anchor', 'middle');
 	s.setAttribute('font-size', popupTextSize);
