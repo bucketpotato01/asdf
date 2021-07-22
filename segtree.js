@@ -28,10 +28,60 @@ const queryOption = "query";
 const updateOption = "update";
 const settingsOption = "settings";
 
+const infoIDPrefix = "onclickInfo";
+const popupTextSize = 'x-small';
+const popupWidth = 100;
+const popupHeight = 50;
+const popupFill = '#e6e6e6';
+const popupBorder = '#000000';
+const popupBorderWidth = 1;
+
 const aboutText = `You are given an array, and you should be able to modify elements and find the sum of a range in the array. Segment trees accomplish this in logarithmic time per operation by breaking the array into segments of size 1, 2, 4, 8, etc.
 Update operations: there are at most lg(N) nodes that cover one index. Traversing the tree from the element at the bottom  up to the top and updating each node along the way will be enough to update.
 Query operations: because of the way the tree is organized, each range is split into at most 2 segments of each length, so at most 2 * lg(N) nodes are queried.
 About the visualization: for update operations, the nodes that are modified at each step are highlighted. For query operations, all nodes in the range queried are highlighted, but only the nodes that are added to the total are highlighted a darker color.`;
+
+function addlabel(svgid, x, y, whatToWrite, nodeInd) {
+
+	if (document.getElementById(infoIDPrefix + svgid) != null) {
+		var cind = document.getElementById(infoIDPrefix + svgid).getAttribute('ind');
+		document.getElementById(infoIDPrefix + svgid).remove();
+		if (cind == nodeInd) return;
+	}
+
+	var popup = document.createElement('g');
+	popup.setAttribute('id', infoIDPrefix + svgid);
+	popup.setAttribute('ind', nodeInd);
+
+	var bg = document.createElement('rect');
+	bg.setAttribute('x', x);
+	bg.setAttribute('y', y - popupHeight);
+	bg.setAttribute('width', popupWidth);
+	bg.setAttribute('height', popupHeight);
+	bg.setAttribute('align', 'bottom');
+
+	bg.setAttribute('fill', popupFill);
+	bg.setAttribute('stroke', popupBorder);
+	bg.setAttribute('stroke-width', popupBorderWidth);
+
+	popup.appendChild(bg);
+
+	var s = document.createElement('text');
+
+	s.setAttribute('x', x + popupWidth / 2);
+	s.setAttribute('y', y - popupHeight / 2.5);
+	s.setAttribute('text-anchor', 'middle');
+	s.setAttribute('font-size', popupTextSize);
+
+	s.innerHTML = whatToWrite;
+
+	popup.appendChild(s);
+
+	document.getElementById(svgid).appendChild(popup);
+
+	document.getElementById(svgid).innerHTML += '';
+
+}
 
 class Segtree {
 
@@ -52,8 +102,26 @@ class Segtree {
 		this.datums = [];
 		this.paredge = [];
 		this.marks = [];
-		this.vis().innerHTML = "";
+		this.rangel = [];
+		this.ranger = [];
 
+		for (var i = 0; i < this.stsize; i++) {
+			this.rangel.push(0);
+			this.ranger.push(0);
+		}
+
+		for (var i = this.stsize - 1; i >= 0; i--) {
+			if (i >= this.bstart) {
+				this.ranger[i] = i - this.bstart;
+				this.rangel[i] = i - this.bstart;
+			}
+			else {
+				this.rangel[i] = this.rangel[i * 2 + 1];
+				this.ranger[i] = this.ranger[i * 2 + 2];
+			}
+		}
+
+		this.vis().innerHTML = "";
 
 		for (var i = 0; i < this.stsize; i++) {
 			this.datums.push(0);
@@ -91,6 +159,18 @@ class Segtree {
 
 		displayNode.setAttribute('id', this.id + nodeIdPrefix + currID);
 
+		var infoText = "Covers [" + this.rangel[currID] + ", " + this.ranger[currID] + "]";
+
+		displayNode.setAttribute('onclick', 
+			'addlabel(' + 
+			('"' + this.id + '"') + ',' 
+			+ x + ',' 
+			+ y + ',' 
+			+ '"' + infoText + '"' + ',' 
+			+ currID + ')');
+
+		displayNode.setAttribute('class', 'visnode');
+
 		this.vis().appendChild(displayNode);
 		this.vis().innerHTML += "";
 
@@ -99,8 +179,6 @@ class Segtree {
 	getCoords(dep, which) {
 
 		var numnodes = 2 ** dep;
-
-		console.log(this.vis());
 
 		var canvasWidth = this.vis().width.animVal.value;
 		var canvasHeight = this.vis().height.animVal.value;

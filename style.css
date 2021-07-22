@@ -4401,3 +4401,6 @@ p {
 	display: table;
 }
 
+.visnode {
+	cursor: pointer;
+}
