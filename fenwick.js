@@ -28,12 +28,66 @@ const queryOption = "query";
 const updateOption = "update";
 const settingsOption = "settings";
 
+const infoIDPrefix = "onclickInfo";
+const popupTextSize = 'x-small';
+const popupWidth = 100;
+const popupHeight = 50;
+const popupFill = '#e6e6e6';
+const popupBorder = '#000000';
+const popupBorderWidth = 1;
+
+function addlabel(svgid, x, y, whatToWrite, nodeInd) {
+
+	if (document.getElementById(infoIDPrefix + svgid) != null) {
+		var cind = document.getElementById(infoIDPrefix + svgid).getAttribute('ind');
+		document.getElementById(infoIDPrefix + svgid).remove();
+		if (cind == nodeInd) return;
+	}
+
+	var popup = document.createElement('g');
+	popup.setAttribute('id', infoIDPrefix + svgid);
+	popup.setAttribute('ind', nodeInd);
+
+	var curroffset = 0;
+	if (x + popupWidth > document.getElementById(svgid).width.animVal.value)
+		curroffset = -popupWidth;
+	
+	var bg = document.createElement('rect');
+	bg.setAttribute('x', x + curroffset);
+	bg.setAttribute('y', y - popupHeight);
+	bg.setAttribute('width', popupWidth);
+	bg.setAttribute('height', popupHeight);
+	bg.setAttribute('align', 'bottom');
+
+	bg.setAttribute('fill', popupFill);
+	bg.setAttribute('stroke', popupBorder);
+	bg.setAttribute('stroke-width', popupBorderWidth);
+
+	popup.appendChild(bg);
+
+	var s = document.createElement('text');
+
+	s.setAttribute('x', x + popupWidth / 2 + curroffset);
+	s.setAttribute('y', y - popupHeight / 2.5);
+	s.setAttribute('text-anchor', 'middle');
+	s.setAttribute('font-size', popupTextSize);
+
+	s.innerHTML = whatToWrite;
+
+	popup.appendChild(s);
+
+	document.getElementById(svgid).appendChild(popup);
+
+	document.getElementById(svgid).innerHTML += '';
+
+}
+
 class Fenwick {
 
 	constructor(id) {
 
 		this.id = id;
-		this.arrSize = 63;
+		this.arrSize = 31;
 
 		this.datums = [];
 		this.paredge = [];
@@ -92,6 +146,21 @@ class Fenwick {
 		displayNode.appendChild(temp);
 
 		displayNode.setAttribute('id', this.id + nodeIdPrefix + currID);
+
+		var infoText = "Covers [" + (currID - (currID & (-currID)) + 1) + ", " + currID + "]";
+
+		if (currID == 0)
+			infoText = "Not actually used";
+
+		displayNode.setAttribute('onclick', 
+			'addlabel(' + 
+			('"' + this.id + '"') + ',' 
+			+ x + ',' 
+			+ y + ',' 
+			+ '"' + infoText + '"' + ',' 
+			+ currID + ')');
+
+		displayNode.setAttribute('class', 'visnode');
 
 		this.vis().appendChild(displayNode);
 		this.vis().innerHTML += "";
@@ -201,6 +270,7 @@ class Fenwick {
 			ans += this.datums[ind];
 			ind -= (ind & (-ind));
 		}
+		this.mark(0);
 		return ans;
 
 	}
@@ -215,7 +285,7 @@ class Fenwick {
 
 		for (var i = 0; i <= this.arrSize; i++) {
 			var currCoords = this.getCoords(i);
-			this.createNode(currCoords[0], currCoords[1], this.datums[i], i);
+			this.createNode(currCoords[0], currCoords[1], (i == 0) ? "" : this.datums[i], i);
 		}
 
 	}
@@ -363,7 +433,6 @@ class UserInteraction {
 		nodeColor = document.getElementById(coloroptions[0][0]).value;
 		nodeBorder = document.getElementById(coloroptions[1][0]).value;
 		markColor = document.getElementById(coloroptions[2][0]).value;
-		queryMark = document.getElementById(coloroptions[3][0]).value;
 		
 		this.bit.redraw();
 
@@ -379,8 +448,7 @@ class UserInteraction {
 		var coloroptions = [
 			["Node Fill", nodeColor],
 			["Node Border", nodeBorder],
-			["Mark Color 1", markColor],
-			["Mark Color 2", queryMark]
+			["Mark Color 1", markColor]
 		]
 
 		for (var i = 0; i < coloroptions.length; i++) {
