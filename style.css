@@ -4387,6 +4387,7 @@ p {
 
 .uidiv {
 	display: inline-block;
+	float: left;
 	margin: 3px 3px 3px 3px;
 }
 
@@ -4403,4 +4404,9 @@ p {
 
 .visnode {
 	cursor: pointer;
+}
+
+.smallinput {
+	height: 15px;
+	width: 75px;
 }

@@ -5,10 +5,9 @@ var nodeBorderWidth = 1;   // name is self-explanatory
 var nodeSize = 8;         // radius of the nodes on the svg
 var markColor = '#ffd7d4'  // the color for marking nodes
 var markWidth = 2;         // radius of marked nodes' borders
-var queryMark = '#ffa6a6'  // color of marked queried nodes
 
-var textOffset = nodeSize / 2;  // make the nodes pretty
-var textSize = 'x-small'        // size of the text in the nodes
+var textSize = 10               // size of the text in the nodes
+var textOffset = textSize / 3;  // make the nodes pretty
 
 // helpful for working with IDs in the html file
 const nodeIdPrefix = "stVisNode";  // prefix for the ID of a node on the svg
@@ -30,10 +29,10 @@ const settingsOption = "settings";
 
 const infoIDPrefix = "onclickInfo";
 const popupTextSize = 'x-small';
-const popupWidth = 150;
-const popupHeight = 30;
-const popupFill = '#e6e6e6';
-const popupBorder = '#000000';
+var popupWidth = 150;
+var popupHeight = 30;
+var popupFill = '#e6e6e6';
+var popupBorder = '#000000';
 const popupBorderWidth = 1;
 
 function addlabel(svgid, x, y, whatToWrite, nodeInd) {
@@ -49,6 +48,7 @@ function addlabel(svgid, x, y, whatToWrite, nodeInd) {
 	popup.setAttribute('ind', nodeInd);
 
 	var curroffset = 0;
+
 	if (x + popupWidth > document.getElementById(svgid).width.animVal.value)
 		curroffset = -popupWidth;
 	
@@ -434,17 +434,41 @@ class UserInteraction {
 
 	}
 
+	checkIfValid(v, ov) {
+		if (isNaN(parseInt(v))) return ov;
+		return parseInt(v);
+	}
+
 	setoptions() {
+
 		var coloroptions = [
 			["Node Fill", nodeColor],
 			["Node Border", nodeBorder],
 			["Mark Color 1", markColor],
-			["Mark Color 2", queryMark]
+			["Popup Fill", popupFill],
+			["Popup Border", popupBorder]
 		]
 			
 		nodeColor = document.getElementById(coloroptions[0][0]).value;
 		nodeBorder = document.getElementById(coloroptions[1][0]).value;
 		markColor = document.getElementById(coloroptions[2][0]).value;
+		popupFill = document.getElementById(coloroptions[3][0]).value;
+		popupBorder = document.getElementById(coloroptions[4][0]).value;
+
+		var cosmeticOptions = [
+			 ["Node Size", nodeSize]
+			,["Node Border Width", nodeBorderWidth]
+			,["Popup Width", popupWidth]
+			,["Popup Height", popupHeight]
+			,["Text Size", textSize]
+		];
+
+		nodeSize = this.checkIfValid(document.getElementById(cosmeticOptions[0][0]).value, nodeSize);
+		nodeBorderWidth = this.checkIfValid(document.getElementById(cosmeticOptions[1][0]).value, nodeBorderWidth);
+		popupWidth = this.checkIfValid(document.getElementById(cosmeticOptions[2][0]).value, popupWidth);
+		popupHeight = this.checkIfValid(document.getElementById(cosmeticOptions[3][0]).value, popupHeight);
+		textSize = this.checkIfValid(document.getElementById(cosmeticOptions[4][0]).value, textSize);
+		textOffset = textSize / 3;
 		
 		this.bit.redraw();
 
@@ -455,36 +479,74 @@ class UserInteraction {
 		this.resetAll();
 
 		var cp = document.getElementById(controlID);
+		// cp.setAttribute("class", "maindiv");
+
 		var dcolors = document.createElement("div");
+		dcolors.setAttribute("class", "uidiv");
 
 		var coloroptions = [
-			["Node Fill", nodeColor],
-			["Node Border", nodeBorder],
-			["Mark Color 1", markColor]
+			 ["Node Fill", nodeColor]
+			,["Node Border", nodeBorder]
+			,["Mark Color 1", markColor]
+			,["Popup Fill", popupFill]
+			,["Popup Border", popupBorder]
 		]
 
 		for (var i = 0; i < coloroptions.length; i++) {
+			var tdiv = document.createElement("div");
+			tdiv.setAttribute("class", "regdiv");
 			var wone = document.createElement("label");
 			wone.innerHTML = coloroptions[i][0];
 			var cin = document.createElement("input");
 			cin.setAttribute("type", "color");
 			cin.setAttribute("value", coloroptions[i][1]);
-			cin.setAttribute("placeholder", coloroptions[i]);
+			cin.setAttribute("placeholder", coloroptions[i][0]);
 			cin.setAttribute("id", coloroptions[i][0]);
-			dcolors.appendChild(wone);
-			dcolors.appendChild(cin);
+			cin.setAttribute("class", "smallinput");
+			tdiv.appendChild(wone);
+			tdiv.appendChild(cin);
+			dcolors.appendChild(tdiv);
+		}
+
+		var dcosmetic = document.createElement("div");
+		dcosmetic.setAttribute("class", "uidiv");
+
+		var cosmeticOptions = [
+			 ["Node Size", nodeSize]
+			,["Node Border Width", nodeBorderWidth]
+			,["Popup Width", popupWidth]
+			,["Popup Height", popupHeight]
+			,["Text Size", textSize]
+		];
+
+		for (var i = 0; i < cosmeticOptions.length; i++) {
+			var tdiv = document.createElement("div");
+			tdiv.setAttribute("class", "regdiv");
+			var wone = document.createElement("label");
+			wone.innerHTML = cosmeticOptions[i][0];
+			var cin = document.createElement("input");
+			cin.setAttribute("type", "number");
+			cin.setAttribute("value", cosmeticOptions[i][1]);
+			cin.setAttribute("placeholder", cosmeticOptions[i][0]);
+			cin.setAttribute("id", cosmeticOptions[i][0]);
+			cin.setAttribute("class", "smallinput");
+			tdiv.appendChild(wone);
+			tdiv.appendChild(cin);
+			dcosmetic.appendChild(tdiv);
 		}
 
 		var odiv = document.createElement("div");
+
 		var butt = document.createElement("button");
 		butt.innerHTML = "Save";
 		butt.setAttribute("onclick", "interaction.setoptions()");
 		odiv.appendChild(butt);
 
 		cp.appendChild(dcolors);
+		cp.appendChild(dcosmetic);
 		cp.appendChild(odiv);
 
-
+		cp.innerHTML += "";
 	}
 
 }
