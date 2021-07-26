@@ -35,6 +35,12 @@ var popupFill = '#e6e6e6';
 var popupBorder = '#000000';
 const popupBorderWidth = 1;
 
+const aboutText = `You are given an array, and you should be able to modify elements and find the sum of a range in the array. Fenwick trees, or Binary Indexed trees (BIT) accomplish this in logarithmic time per operation.
+Each index is assigned a range to cover based on its lowest set bit: for example, the lowest set bit of 22 (10110 in binary) would be 2 (00010 in binary), so index 22 would cover a range of size 2.
+Update operations: there is at most one node of each size that covers any one index. Iterating through and changing these nodes takes lg(N) time.
+Query operations: Traversing the tree rightwards until the zero node will go through at most lg(N) nodes.`;
+
+
 function addlabel(svgid, x, y, whatToWrite, nodeInd) {
 
 	if (document.getElementById(infoIDPrefix + svgid) != null) {
@@ -84,10 +90,10 @@ function addlabel(svgid, x, y, whatToWrite, nodeInd) {
 
 class Fenwick {
 
-	constructor(id) {
+	constructor(id, sz = 31) {
 
 		this.id = id;
-		this.arrSize = 31;
+		this.arrSize = sz;
 
 		this.datums = [];
 		this.paredge = [];
@@ -357,25 +363,37 @@ class UserInteraction {
 		txt.innerHTML = "";
 	}
 
+	addText(where, what) {
+
+		var newp = document.createElement("p");
+		newp.innerHTML = what;
+		document.getElementById(where).appendChild(newp);
+
+	}
+
 	setHTMLToAbout() {
 		
 		this.resetAll();
 
-		var tw = document.getElementById(whereToWrite);
-
+		var ts = document.getElementById(whereToWrite);
 		document.getElementById(controlID).innerHTML = "";
 
-		var purpose = document.createElement("p");
-		purpose.innerHTML = 
-		"Fenwick trees can be used for quickly modifying and querying an array in lg(N) time per operation.";
-		
-		tw.appendChild(purpose);
+		var texttowrite = aboutText.split("\n");
 
-		var aboutVis = document.createElement("p");
-		aboutVis.innerHTML =
-		"About this visualization: when updating, the nodes that are changed will be highlighted. When querying, the datums that are added to the total are highlighted in a darker color.";
+		this.addText(whereToWrite, texttowrite[0]);
+		this.addText(whereToWrite, texttowrite[1]);
 
-		tw.appendChild(aboutVis);
+		this.addText(whereToWrite, texttowrite[2]);
+
+		ts.innerHTML += "<div class='maindiv'><svg id=uexsvg width='512' height='512'></svg></div>";
+		var uexst = new Fenwick("uexsvg", 63);
+		uexst.upd(17, 1);
+
+		this.addText(whereToWrite, texttowrite[3]);
+
+		ts.innerHTML += "<div class='maindiv'><svg id=qexsvg width='512' height='512'></svg></div>";
+		var qexst = new Fenwick("qexsvg", 63);
+		qexst.query(55);
 
 	}
 
