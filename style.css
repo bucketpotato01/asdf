@@ -1560,7 +1560,7 @@ body {
 }
 
 .site-header {
-	background-color: #fafafa;
+	background-color: #1f1f1f;
 	position: relative;
 }
 
@@ -4409,4 +4409,9 @@ p {
 .smallinput {
 	height: 15px;
 	width: 75px;
+}
+
+.site-header {
+	/*text-align: center;*/
+	color: #f0efed;
 }
