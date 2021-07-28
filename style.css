@@ -4402,7 +4402,7 @@ p {
 	display: table;
 }
 
-.visnode {
+.visnode, b {
 	cursor: pointer;
 }
 
