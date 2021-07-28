@@ -42,6 +42,7 @@ Query operations: because of the way the tree is organized, each range is split 
 About the visualization: for update operations, the nodes that are modified at each step are highlighted. For query operations, all nodes in the range queried are highlighted, but only the nodes that are added to the total are highlighted a darker color.`;
 
 const moreAboutSTUses = `The segment tree can also be extended to support a wide variety of operations, such as range updates, multiple different types of update operations (add, set, multiply, all at the same time), and higher-dimensional segment trees.`;
+const moreAboutSTUpdate = `To find the parent of a node with index i, take (i - 1) / 2, rounding down. Repeat until node 0 is reached. In this example, 1 is added to the node with index 3.`;
 
 function addlabel(svgid, x, y, whatToWrite, nodeInd) {
 
@@ -338,11 +339,31 @@ class AboutSegtree {
 
 	constructor(ts) {
 
+		this.ts = ts;
+
+		this.addAbout();
+		
+		this.addAboutUpdate();
+
+		this.addAboutQuery();
+		
+	}
+
+	addText(where, what) {
+
+		var newp = document.createElement("p");
+		newp.innerHTML = what;
+		document.getElementById(where).appendChild(newp);
+
+	}
+
+	addAbout() {
+
+		var ts = this.ts;
 		var texttowrite = aboutText.split("\n");
 
 		this.addText(whereToWrite, texttowrite[0]);
 		
-		var moreinfo1 = document.createElement("p");
 		var sptxt1 = document.createElement("b");
 		sptxt1.innerHTML = "What else are segment trees used for?";
 
@@ -362,42 +383,121 @@ class AboutSegtree {
 		infosp1.setAttribute("style", "display: none;");
 		infosp1.innerHTML = moreAboutSTUses;
 
-		moreinfo1.appendChild(sptxt1);
-		moreinfo1.appendChild(infosp1);
-		ts.appendChild(moreinfo1);
+		ts.appendChild(sptxt1);
+		ts.appendChild(infosp1);
+
+		var chr = document.createElement("hr");
+		ts.appendChild(chr);
+
+	}
+
+	addAboutUpdate() {
+
+		var ts = this.ts;
+		var texttowrite = aboutText.split("\n");
 
 		this.addText(whereToWrite, texttowrite[1]);
 
+		var moreinfo2 = document.createElement("p");
+		var sptxt2 = document.createElement("b");
+		sptxt2.innerHTML = "How is the tree traversed?";
+
+
+		sptxt2.setAttribute("onclick", `
+
+			if (document.getElementById('updateinfovis').style.display == 'none') {
+				document.getElementById('updateinfovis').style.display = '';
+				document.getElementById('uexsvg').style.display = '';
+				document.getElementById('updinfotxt').style.display = '';
+				document.getElementById('extinf').style.display = '';
+				
+			}
+			else {
+				document.getElementById('updateinfovis').style.display = 'none';
+				document.getElementById('uexsvg').style.display = 'none';
+				document.getElementById('updinfotxt').style.display = 'none';
+				document.getElementById('extinf').style.display = 'none';
+			}
+
+			`)
+
+		var extinf = document.createElement("p");
+		extinf.setAttribute("style", "display: none;");
+		extinf.setAttribute("id", "extinf");
+		extinf.innerHTML = moreAboutSTUpdate;
+
 		var updiv = document.createElement("p");
+		updiv.setAttribute("id", "updateinfovis");
 		updiv.setAttribute("class", "maindiv");
+		updiv.setAttribute("style", "display: none;");
 
 		for (var i = 1; i <= 5; i++) {
 			var cb = document.createElement("b");
 			cb.innerHTML = "Step " + i + " ";
+			cb.setAttribute("onclick", `
+
+				AboutSegtree.updopsteps(${i}, 3, 1);
+
+				`)
 			updiv.appendChild(cb);
 		}
 
-		ts.appendChild(updiv);
+		moreinfo2.appendChild(sptxt2);
+		moreinfo2.appendChild(extinf);
+		moreinfo2.appendChild(updiv);
 
-		ts.innerHTML += "<div class='maindiv'><svg id=uexsvg width='512' height='512'></svg></div>";
+		var updinfotxt = document.createElement("p");
+		updinfotxt.setAttribute("class", "maindiv");
+		updinfotxt.setAttribute("id", "updinfotxt");
+		
+		updinfotxt.innerHTML = "";
+		moreinfo2.appendChild(updinfotxt);
+
+		ts.appendChild(moreinfo2);
+
+		moreinfo2.innerHTML += "<div class='maindiv'><svg id=uexsvg width='512' height='512' style='display: none;'></svg></div>";
 		this.uexst = new Segtree("uexsvg");
-		this.uexst.upd(3, 1);
 
+		var chr = document.createElement("hr");
+		ts.appendChild(chr);
 
+	}
+
+	addAboutQuery() {
+
+		var ts = this.ts;
+		var texttowrite = aboutText.split("\n");
 		this.addText(whereToWrite, texttowrite[2]);
 
 		ts.innerHTML += "<div class='maindiv'><svg id=qexsvg width='512' height='512'></svg></div>";
 		this.qexst = new Segtree("qexsvg");
 		this.qexst.query(1, 14);
 
-		this.addText(whereToWrite, texttowrite[3]);
 	}
 
-	addText(where, what) {
+	static updopsteps(numSteps, indToUpd, valToAdd) {
+		this.uexst = new Segtree("uexsvg")
+		this.uexst.unmarkall();
+		for (var i = 0; i < this.uexst.stsize; i++)
+			this.uexst.set(i, 0);
 
-		var newp = document.createElement("p");
-		newp.innerHTML = what;
-		document.getElementById(where).appendChild(newp);
+		var pv = -1;
+		indToUpd += this.uexst.bstart;
+		for (var i = 0; i < numSteps; i++) {
+			this.uexst.set(indToUpd, valToAdd);
+			this.uexst.mark(indToUpd, true, queryMark);
+			pv = indToUpd;
+			indToUpd = Math.floor((indToUpd - 1) / 2);
+		}
+
+		if (pv == 0) {
+			document.getElementById('updinfotxt').innerHTML = `Just updated node with index 0, now finished.`;
+		}
+		else {
+			this.uexst.mark(indToUpd);
+			document.getElementById('updinfotxt').innerHTML = `Just updated node with index ${pv}, now at node with index (${pv} - 1) / 2 = ${indToUpd}.`;
+		}
+
 
 	}
 

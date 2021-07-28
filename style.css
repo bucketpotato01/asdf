@@ -4415,3 +4415,8 @@ p {
 	/*text-align: center;*/
 	color: #f0efed;
 }
+
+hr {
+	clear: both;
+	margin-top: 20px;
+}
