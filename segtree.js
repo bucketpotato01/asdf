@@ -43,6 +43,53 @@ About the visualization: for update operations, the nodes that are modified at e
 
 const moreAboutSTUses = `The segment tree can also be extended to support a wide variety of operations, such as range updates, multiple different types of update operations (add, set, multiply, all at the same time), and higher-dimensional segment trees.`;
 const moreAboutSTUpdate = `To find the parent of a node with index i, take (i - 1) / 2, rounding down. Repeat until node 0 is reached. In this example, 1 is added to the node with index 3.`;
+const stpsuedocode = `
+// pseudocode for segment tree (add update, range sum query) implementation
+
+build(arraySize) {
+
+	bstart = 1
+	while (bstart < arraySize) {
+		bstart = bstart * 2
+	}
+
+	segtreesize = bstart * 2 - 1
+	bstart = bstart - 1
+
+	segtree = array of size segtreesize
+
+
+}
+
+queryRecursive(currInd, currLo, currHi, queryLo, queryHi) {
+
+	if (currLo >= queryLo and currHi <= queryHi) {
+		return segtree[currInd]
+	}
+	if (currLo > queryHi or currHi < queryLo) {
+		return 0
+	}
+
+	mid = (currLo + currHi) / 2
+
+	return queryRecursive(currInd * 2 + 1, currLo, mid, queryLo, queryHi) +
+	       queryRecursive(currInd * 2 + 2, mid + 1, currHi, queryLo, queryHi);
+
+}
+
+query(lo, hi) {
+	return queryRecursive(0, 0, bstart, queryLo, queryHi)
+}
+
+update(ind, val) {
+	ind = ind + bstart
+	while (ind >= 0) {
+		segtree[ind] += val
+		if (ind == 0) break
+		ind = (ind - 1) / 2
+	}
+}
+`
 
 function addlabel(svgid, x, y, whatToWrite, nodeInd) {
 
@@ -346,6 +393,8 @@ class AboutSegtree {
 		this.addAboutUpdate();
 
 		this.addAboutQuery();
+
+		this.addPseudocode();
 		
 	}
 
@@ -469,9 +518,84 @@ class AboutSegtree {
 		var texttowrite = aboutText.split("\n");
 		this.addText(whereToWrite, texttowrite[2]);
 
-		ts.innerHTML += "<div class='maindiv'><svg id=qexsvg width='512' height='512'></svg></div>";
+		var moreinfo3 = document.createElement("p");
+		var sptxt3 = document.createElement("b");
+		sptxt3.innerHTML = "Why this upper bound?";
+
+		sptxt3.setAttribute("onclick", `
+
+			if (document.getElementById('qexsvg').style.display == 'none') {
+				document.getElementById('qexsvg').style.display = '';
+				document.getElementById('queryinfotxt').style.display = '';
+			}
+			else {
+				document.getElementById('qexsvg').style.display = 'none';
+				document.getElementById('qexsvg').style.display = 'none';
+				document.getElementById('queryinfotxt').style.display = 'none';
+				
+			}
+
+			`)
+
+		moreinfo3.appendChild(sptxt3);
+
+		var queryinfotxt = document.createElement("p");
+		queryinfotxt.innerHTML = "Any segment can be represented as a sequence of segments of length one. First, merge adjacent elements into segments of length two. Doing this will leave at most 2 segments of length one. Repeat the process for segments of length two (ignoring the segments of length one now), all the way up to segments of length n. This will leave at most 2 segments of each length to query.";
+		queryinfotxt.setAttribute("style", "display: none;");
+		queryinfotxt.setAttribute("id", "queryinfotxt");
+		moreinfo3.appendChild(queryinfotxt);
+
+		ts.appendChild(moreinfo3);
+
+		ts.innerHTML += "<div class='maindiv'><svg id=qexsvg width='512' height='512' style='display: none;''></svg></div>";
 		this.qexst = new Segtree("qexsvg");
 		this.qexst.query(1, 14);
+
+		var chr = document.createElement("hr");
+		ts.appendChild(chr);
+
+	}
+
+	addPseudocode() {
+
+		var ts = this.ts;
+
+		var cspoiler = document.createElement("b");
+		cspoiler.innerHTML = "Pseudocode for the segment tree";
+
+		cspoiler.setAttribute("onclick", `
+
+			if (document.getElementById('pseudocode').style.display == 'none') {
+				document.getElementById('pseudocode').style.display = '';
+				document.getElementById('pseudocodecode').style.display = '';
+				document.getElementById('pseudocodepre').style.display = '';
+			}
+			else {
+				document.getElementById('pseudocode').style.display = 'none';
+				document.getElementById('pseudocodecode').style.display = 'none';
+				document.getElementById('pseudocodepre').style.display = 'none';
+			}
+
+			`)
+
+		var codep = document.createElement("p");
+		var codeb = document.createElement("pre");
+		var acode = document.createElement("code");
+		acode.innerHTML = stpsuedocode;
+
+		codeb.appendChild(acode);
+		codep.appendChild(codeb);
+
+		acode.setAttribute("style", "display: none;");
+		acode.setAttribute("id", "pseudocode");
+		codeb.setAttribute("style", "display: none;");
+		codeb.setAttribute("id", "pseudocodecode");
+		codep.setAttribute("style", "display: none;");
+		codep.setAttribute("id", "pseudocodepre");
+		
+		ts.appendChild(cspoiler);
+		ts.appendChild(codep);
+		ts.innerHTML += "";
 
 	}
 
