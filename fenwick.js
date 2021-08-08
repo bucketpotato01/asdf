@@ -36,10 +36,10 @@ var popupBorder = '#000000';
 const popupBorderWidth = 1;
 
 const aboutText = `You are given an array, and you should be able to modify elements and find the sum of a range in the array. Fenwick trees, or Binary Indexed trees (BIT) accomplish this in logarithmic time per operation.
-Each index is assigned a range to cover based on its lowest set bit: for example, the lowest set bit of 22 (10110 in binary) would be 2 (00010 in binary), so index 22 would cover a range of size 2.
 Update operations: there is at most one node of each size that covers any one index. Iterating through and changing these nodes takes lg(N) time.
 Query operations: Traversing the tree rightwards until the zero node will go through at most lg(N) nodes.`;
 
+const bitotheruses = `Each index is assigned a range to cover based on its lowest set bit: for example, the lowest set bit of 22 (10110 in binary) would be 2 (00010 in binary), so index 22 would cover a range of size 2.`;
 
 function addlabel(svgid, x, y, whatToWrite, nodeInd) {
 
@@ -47,7 +47,7 @@ function addlabel(svgid, x, y, whatToWrite, nodeInd) {
 		var cind = document.getElementById(infoIDPrefix + svgid).getAttribute('ind');
 		document.getElementById(infoIDPrefix + svgid).remove();
 		if (cind == nodeInd) return;
-	}
+	} 
 
 	var popup = document.createElement('g');
 	popup.setAttribute('id', infoIDPrefix + svgid);
@@ -85,6 +85,111 @@ function addlabel(svgid, x, y, whatToWrite, nodeInd) {
 	document.getElementById(svgid).appendChild(popup);
 
 	document.getElementById(svgid).innerHTML += '';
+
+}
+
+class AboutFenwick {
+
+	constructor(ts) {
+		this.ts = ts;
+
+		this.addAbout();
+		this.addAboutUpdate();
+		this.addAboutQuery();
+
+		ts.innerHTML += "";
+
+	}
+
+	addDivider() {
+		var ts = this.ts;
+		var chr = document.createElement("hr");
+		ts.appendChild(chr);
+	}
+
+	addText(where, what) {
+
+		var newp = document.createElement("p");
+		newp.innerHTML = what;
+		document.getElementById(where).appendChild(newp);
+
+	}
+
+	makeSpoiler(sptxt, tospoiler) {
+		var res = document.createElement("b");
+		res.innerHTML = sptxt;
+
+		var v1 = "";
+		var v2 = "";
+		for (var j = 0; j < tospoiler.length; j++) {
+			var i = tospoiler[j];
+			v1 = v1 + `document.getElementById('${i}').style.display = '';`;
+			v2 = v2 + `document.getElementById('${i}').style.display = 'none';`;
+		}
+		var finif = `if (document.getElementById('${tospoiler[0]}').style.display == 'none') {${v1}} else {${v2}}`;
+
+		res.setAttribute("onclick", finif);
+		var fr = document.createElement("p");
+		fr.appendChild(res);
+		return fr;
+
+	}
+
+	hiddenText(ttxt, tid) {
+		var res = document.createElement("p");
+		res.setAttribute("id", tid);
+		res.setAttribute("style", "display: none;");
+		res.innerHTML = ttxt;
+		return res;
+	}
+
+	addAbout() {
+
+		var ts = this.ts;
+		var texttowrite = aboutText.split("\n");
+
+		this.addText(whereToWrite, texttowrite[0]);
+
+		var bt = this.makeSpoiler("How does the BIT do this?", ["moreaboutbitusage"]);
+		var moreinfo = this.hiddenText(bitotheruses, "moreaboutbitusage");
+		
+		ts.appendChild(bt);
+		ts.appendChild(moreinfo);
+
+
+		this.addDivider();
+
+	}
+
+	addAboutUpdate() {
+
+		var ts = this.ts;
+		var texttowrite = aboutText.split("\n");
+
+		this.addText(whereToWrite, texttowrite[1]);
+		ts.innerHTML += "<div class='maindiv'><svg id=uexsvg width='512' height='512'></svg></div>";
+		var uexst = new Fenwick("uexsvg", 63);
+		uexst.upd(17, 1);
+
+
+		this.addDivider();
+
+	}
+
+	addAboutQuery() {
+
+		var ts = this.ts;
+		var texttowrite = aboutText.split("\n");
+
+		this.addText(whereToWrite, texttowrite[2]);
+		ts.innerHTML += "<div class='maindiv'><svg id=qexsvg width='512' height='512'></svg></div>";
+		var qexst = new Fenwick("qexsvg", 63);
+		qexst.query(55);
+
+
+		this.addDivider();
+
+	}
 
 }
 
@@ -374,26 +479,11 @@ class UserInteraction {
 	setHTMLToAbout() {
 		
 		this.resetAll();
-
-		var ts = document.getElementById(whereToWrite);
 		document.getElementById(controlID).innerHTML = "";
 
-		var texttowrite = aboutText.split("\n");
+		var ts = document.getElementById(whereToWrite);
 
-		this.addText(whereToWrite, texttowrite[0]);
-		this.addText(whereToWrite, texttowrite[1]);
-
-		this.addText(whereToWrite, texttowrite[2]);
-
-		ts.innerHTML += "<div class='maindiv'><svg id=uexsvg width='512' height='512'></svg></div>";
-		var uexst = new Fenwick("uexsvg", 63);
-		uexst.upd(17, 1);
-
-		this.addText(whereToWrite, texttowrite[3]);
-
-		ts.innerHTML += "<div class='maindiv'><svg id=qexsvg width='512' height='512'></svg></div>";
-		var qexst = new Fenwick("qexsvg", 63);
-		qexst.query(55);
+		var helper = new AboutFenwick(ts);
 
 	}
 

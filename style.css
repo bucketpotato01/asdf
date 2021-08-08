@@ -4379,7 +4379,7 @@ button, input, label {
 	margin: 3px 3px 3px 3px;
 }
 
-p {
+p, pre {
 	float: left;
 	text-align: left;
 	margin: 10px 10px 10px 10px;

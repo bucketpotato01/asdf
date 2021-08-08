@@ -42,7 +42,7 @@ Query operations: because of the way the tree is organized, each range is split 
 About the visualization: for update operations, the nodes that are modified at each step are highlighted. For query operations, all nodes in the range queried are highlighted, but only the nodes that are added to the total are highlighted a darker color.`;
 
 const moreAboutSTUses = `The segment tree can also be extended to support a wide variety of operations, such as range updates, multiple different types of update operations (add, set, multiply, all at the same time), and higher-dimensional segment trees.`;
-const moreAboutSTUpdate = `To find the parent of a node with index i, take (i - 1) / 2, rounding down. Repeat until node 0 is reached. In this example, 1 is added to the node with index 3.`;
+const moreAboutSTUpdate = `Start at the bottom by adding a constant to the index being added to. To find the parent of a node with index i, take (i - 1) / 2, rounding down. Repeat until node 0 is reached. In this example, 1 is added to the node with index 3.`;
 const stpsuedocode = `
 // pseudocode for segment tree (add update, range sum query) implementation
 
@@ -406,26 +406,34 @@ class AboutSegtree {
 
 	}
 
+	makeSpoiler(sptxt, tospoiler) {
+		var res = document.createElement("b");
+		res.innerHTML = sptxt;
+
+		var v1 = "";
+		var v2 = "";
+		for (var j = 0; j < tospoiler.length; j++) {
+			var i = tospoiler[j];
+			v1 = v1 + `document.getElementById('${i}').style.display = '';`;
+			v2 = v2 + `document.getElementById('${i}').style.display = 'none';`;
+		}
+		var finif = `if (document.getElementById('${tospoiler[0]}').style.display == 'none') {${v1}} else {${v2}}`;
+
+		res.setAttribute("onclick", finif);
+		var fr = document.createElement("p");
+		fr.appendChild(res);
+		return fr;
+
+	}
+
 	addAbout() {
 
 		var ts = this.ts;
 		var texttowrite = aboutText.split("\n");
 
 		this.addText(whereToWrite, texttowrite[0]);
-		
-		var sptxt1 = document.createElement("b");
-		sptxt1.innerHTML = "What else are segment trees used for?";
-
-		sptxt1.setAttribute("onclick", `
-
-			if (document.getElementById('infosp1').style.display == 'none') {
-				document.getElementById('infosp1').style.display = '';
-			}
-			else {
-				document.getElementById('infosp1').style.display = 'none';
-			}
-
-			`)
+			
+		var sptxt1 = this.makeSpoiler("What else are segment trees used for?", ['infosp1']);
 
 		var infosp1 = document.createElement("p");
 		infosp1.setAttribute("id", "infosp1");
@@ -448,27 +456,7 @@ class AboutSegtree {
 		this.addText(whereToWrite, texttowrite[1]);
 
 		var moreinfo2 = document.createElement("p");
-		var sptxt2 = document.createElement("b");
-		sptxt2.innerHTML = "How is the tree traversed?";
-
-
-		sptxt2.setAttribute("onclick", `
-
-			if (document.getElementById('updateinfovis').style.display == 'none') {
-				document.getElementById('updateinfovis').style.display = '';
-				document.getElementById('uexsvg').style.display = '';
-				document.getElementById('updinfotxt').style.display = '';
-				document.getElementById('extinf').style.display = '';
-				
-			}
-			else {
-				document.getElementById('updateinfovis').style.display = 'none';
-				document.getElementById('uexsvg').style.display = 'none';
-				document.getElementById('updinfotxt').style.display = 'none';
-				document.getElementById('extinf').style.display = 'none';
-			}
-
-			`)
+		var sptxt2 = this.makeSpoiler("How is the tree traversed?", ['updateinfovis', 'uexsvg', 'updinfotxt', 'extinf']);
 
 		var extinf = document.createElement("p");
 		extinf.setAttribute("style", "display: none;");
@@ -491,7 +479,7 @@ class AboutSegtree {
 			updiv.appendChild(cb);
 		}
 
-		moreinfo2.appendChild(sptxt2);
+		ts.appendChild(sptxt2);
 		moreinfo2.appendChild(extinf);
 		moreinfo2.appendChild(updiv);
 
@@ -519,25 +507,9 @@ class AboutSegtree {
 		this.addText(whereToWrite, texttowrite[2]);
 
 		var moreinfo3 = document.createElement("p");
-		var sptxt3 = document.createElement("b");
-		sptxt3.innerHTML = "Why this upper bound?";
+		var sptxt3 = this.makeSpoiler("Why this upper bound?", ['qexsvg', 'queryinfotxt']);
 
-		sptxt3.setAttribute("onclick", `
-
-			if (document.getElementById('qexsvg').style.display == 'none') {
-				document.getElementById('qexsvg').style.display = '';
-				document.getElementById('queryinfotxt').style.display = '';
-			}
-			else {
-				document.getElementById('qexsvg').style.display = 'none';
-				document.getElementById('qexsvg').style.display = 'none';
-				document.getElementById('queryinfotxt').style.display = 'none';
-				
-			}
-
-			`)
-
-		moreinfo3.appendChild(sptxt3);
+		ts.appendChild(sptxt3);
 
 		var queryinfotxt = document.createElement("p");
 		queryinfotxt.innerHTML = "Any segment can be represented as a sequence of segments of length one. First, merge adjacent elements into segments of length two. Doing this will leave at most 2 segments of length one. Repeat the process for segments of length two (ignoring the segments of length one now), all the way up to segments of length n. This will leave at most 2 segments of each length to query.";
@@ -560,23 +532,25 @@ class AboutSegtree {
 
 		var ts = this.ts;
 
-		var cspoiler = document.createElement("b");
-		cspoiler.innerHTML = "Pseudocode for the segment tree";
+		var cspoiler = this.makeSpoiler("Pseudocode for the segment tree", ['pseudocode', 'pseudocodecode', 'pseudocodepre']);
 
-		cspoiler.setAttribute("onclick", `
+		// var cspoiler = document.createElement("b");
+		// cspoiler.innerHTML = "Pseudocode for the segment tree";
 
-			if (document.getElementById('pseudocode').style.display == 'none') {
-				document.getElementById('pseudocode').style.display = '';
-				document.getElementById('pseudocodecode').style.display = '';
-				document.getElementById('pseudocodepre').style.display = '';
-			}
-			else {
-				document.getElementById('pseudocode').style.display = 'none';
-				document.getElementById('pseudocodecode').style.display = 'none';
-				document.getElementById('pseudocodepre').style.display = 'none';
-			}
+		// cspoiler.setAttribute("onclick", `
 
-			`)
+		// 	if (document.getElementById('pseudocode').style.display == 'none') {
+		// 		document.getElementById('pseudocode').style.display = '';
+		// 		document.getElementById('pseudocodecode').style.display = '';
+		// 		document.getElementById('pseudocodepre').style.display = '';
+		// 	}
+		// 	else {
+		// 		document.getElementById('pseudocode').style.display = 'none';
+		// 		document.getElementById('pseudocodecode').style.display = 'none';
+		// 		document.getElementById('pseudocodepre').style.display = 'none';
+		// 	}
+
+		// 	`)
 
 		var codep = document.createElement("p");
 		var codeb = document.createElement("pre");
@@ -593,8 +567,11 @@ class AboutSegtree {
 		codep.setAttribute("style", "display: none;");
 		codep.setAttribute("id", "pseudocodepre");
 		
+		var fp = document.createElement("p");
+		fp.appendChild(codep);
+		
 		ts.appendChild(cspoiler);
-		ts.appendChild(codep);
+		ts.appendChild(fp);
 		ts.innerHTML += "";
 
 	}
