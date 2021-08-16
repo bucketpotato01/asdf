@@ -22,6 +22,7 @@ const lInputID = "linput";
 const rInputID = "rinput";
 const controlID = "controls";      // ID of the control panel
 const whereToWrite = "outputText"; // ID of the div to put text onto
+const whereToWrite2 = "outputText2";
 const selectionBar = "selectionBar";
 const aboutOption = "about";
 const queryOption = "query";
@@ -36,113 +37,13 @@ var popupFill = '#e6e6e6';
 var popupBorder = '#000000';
 const popupBorderWidth = 1;
 
-const aboutText = `You are given an array, and you should be able to modify elements and find the sum of a range in the array. Segment trees accomplish this in logarithmic time per operation by breaking the array into segments of size 1, 2, 4, 8, etc.
-Update operations: there are at most lg(N) nodes that cover one index. Traversing the tree from the element at the bottom  up to the top and updating each node along the way will be enough to update.
-Query operations: because of the way the tree is organized, each range is split into at most 2 segments of each length, so at most 2 * lg(N) nodes are queried.
-About the visualization: for update operations, the nodes that are modified at each step are highlighted. For query operations, all nodes in the range queried are highlighted, but only the nodes that are added to the total are highlighted a darker color.`;
-
-const moreAboutSTUses = `The segment tree can also be extended to support a wide variety of operations, such as range updates, multiple different types of update operations (add, set, multiply, all at the same time), and higher-dimensional segment trees.`;
-const moreAboutSTUpdate = `Start at the bottom by adding a constant to the index being added to. To find the parent of a node with index i, take (i - 1) / 2, rounding down. Repeat until node 0 is reached. In this example, 1 is added to the node with index 3.`;
-const stpsuedocode = `
-// pseudocode for segment tree (add update, range sum query) implementation
-
-build(arraySize) {
-
-	bstart = 1
-	while (bstart < arraySize) {
-		bstart = bstart * 2
-	}
-
-	segtreesize = bstart * 2 - 1
-	bstart = bstart - 1
-
-	segtree = array of size segtreesize
-
-
-}
-
-queryRecursive(currInd, currLo, currHi, queryLo, queryHi) {
-
-	if (currLo >= queryLo and currHi <= queryHi) {
-		return segtree[currInd]
-	}
-	if (currLo > queryHi or currHi < queryLo) {
-		return 0
-	}
-
-	mid = (currLo + currHi) / 2
-
-	return queryRecursive(currInd * 2 + 1, currLo, mid, queryLo, queryHi) +
-	       queryRecursive(currInd * 2 + 2, mid + 1, currHi, queryLo, queryHi);
-
-}
-
-query(lo, hi) {
-	return queryRecursive(0, 0, bstart, queryLo, queryHi)
-}
-
-update(ind, val) {
-	ind = ind + bstart
-	while (ind >= 0) {
-		segtree[ind] += val
-		if (ind == 0) break
-		ind = (ind - 1) / 2
-	}
-}
-`
-
-function addlabel(svgid, x, y, whatToWrite, nodeInd) {
-
-	if (document.getElementById(infoIDPrefix + svgid) != null) {
-		var cind = document.getElementById(infoIDPrefix + svgid).getAttribute('ind');
-		document.getElementById(infoIDPrefix + svgid).remove();
-		if (cind == nodeInd) return;
-	}
-
-	var popup = document.createElement('g');
-	popup.setAttribute('id', infoIDPrefix + svgid);
-	popup.setAttribute('ind', nodeInd);
-
-	var curroffset = 0;
-	if (x + popupWidth > document.getElementById(svgid).width.animVal.value)
-		curroffset = -popupWidth;
-	
-	var bg = document.createElement('rect');
-	bg.setAttribute('x', x + curroffset);
-	bg.setAttribute('y', y - popupHeight);
-	bg.setAttribute('width', popupWidth);
-	bg.setAttribute('height', popupHeight);
-	bg.setAttribute('align', 'bottom');
-
-	bg.setAttribute('fill', popupFill);
-	bg.setAttribute('stroke', popupBorder);
-	bg.setAttribute('stroke-width', popupBorderWidth);
-
-	popup.appendChild(bg);
-
-	var s = document.createElement('text');
-
-	s.setAttribute('x', x + popupWidth / 2 + curroffset);
-	s.setAttribute('y', y - popupHeight / 2.5);
-	s.setAttribute('text-anchor', 'middle');
-	s.setAttribute('font-size', popupTextSize);
-
-	s.innerHTML = whatToWrite;
-
-	popup.appendChild(s);
-
-	document.getElementById(svgid).appendChild(popup);
-
-	document.getElementById(svgid).innerHTML += '';
-
-}
 
 class Segtree {
 
-	constructor(id) {
+	constructor(id, tsize = 16) {
 
 		this.id = id;
-		this.arrSize = 16;
+		this.arrSize = tsize;
 
 		this.bstart = 1;
 		this.maxDepth = 0;
@@ -216,7 +117,7 @@ class Segtree {
 		var infoText = "Covers [" + this.rangel[currID] + ", " + this.ranger[currID] + "]";
 
 		displayNode.setAttribute('onclick', 
-			'addlabel(' + 
+			'Segtree.addlabel(' + 
 			('"' + this.id + '"') + ',' 
 			+ x + ',' 
 			+ y + ',' 
@@ -380,21 +281,119 @@ class Segtree {
 	query(lo, hi) {
 		return this.queryRecursive(0, 0, this.bstart, lo, hi);
 	}
+
+	static addlabel(svgid, x, y, whatToWrite, nodeInd) {
+
+		if (document.getElementById(infoIDPrefix + svgid) != null) {
+			var cind = document.getElementById(infoIDPrefix + svgid).getAttribute('ind');
+			document.getElementById(infoIDPrefix + svgid).remove();
+			if (cind == nodeInd) return;
+		}
+
+		var popup = document.createElement('g');
+		popup.setAttribute('id', infoIDPrefix + svgid);
+		popup.setAttribute('ind', nodeInd);
+
+		var curroffset = 0;
+		if (x + popupWidth > document.getElementById(svgid).width.animVal.value)
+			curroffset = -popupWidth;
+		
+		var bg = document.createElement('rect');
+		bg.setAttribute('x', x + curroffset);
+		bg.setAttribute('y', y - popupHeight);
+		bg.setAttribute('width', popupWidth);
+		bg.setAttribute('height', popupHeight);
+		bg.setAttribute('align', 'bottom');
+
+		bg.setAttribute('fill', popupFill);
+		bg.setAttribute('stroke', popupBorder);
+		bg.setAttribute('stroke-width', popupBorderWidth);
+
+		popup.appendChild(bg);
+
+		var s = document.createElement('text');
+
+		s.setAttribute('x', x + popupWidth / 2 + curroffset);
+		s.setAttribute('y', y - popupHeight / 2.5);
+		s.setAttribute('text-anchor', 'middle');
+		s.setAttribute('font-size', popupTextSize);
+
+		s.innerHTML = whatToWrite;
+
+		popup.appendChild(s);
+
+		document.getElementById(svgid).appendChild(popup);
+
+		document.getElementById(svgid).innerHTML += '';
+
+	}
 }
 
 class AboutSegtree {
 
+	static aboutText = `You are given an array, and you should be able to modify elements and find the sum of a range in the array. Segment trees accomplish this in logarithmic time per operation by breaking the array into segments of size 1, 2, 4, 8, etc.
+	Update operations: there are at most lg(N) nodes that cover one index. Traversing the tree from the element at the bottom  up to the top and updating each node along the way will be enough to update.
+	Query operations: because of the way the tree is organized, each range is split into at most 2 segments of each length, so at most 2 * lg(N) nodes are queried.
+	About the visualization: for update operations, the nodes that are modified at each step are highlighted. For query operations, all nodes in the range queried are highlighted, but only the nodes that are added to the total are highlighted a darker color.`;
+
+	static moreAboutSTUses = `The segment tree can also be extended to support a wide variety of operations, such as range updates, multiple different types of update operations (add, set, multiply, all at the same time), and higher-dimensional segment trees.`;
+	static moreAboutSTUpdate = `Start at the bottom by adding a constant to the index being added to. To find the parent of a node with index i, take (i - 1) / 2, rounding down. Repeat until node 0 is reached. In this example, 1 is added to the node with index 3.`;
+	static stpsuedocode = `// roguh C++ code for the ST
+
+void build(int arraySize) {
+
+	bstart = 1;
+	while (bstart < arraySize)
+		bstart = bstart * 2;
+	
+
+	segtreesize = bstart * 2 - 1;
+	bstart = bstart - 1;
+
+	// fill the segtree with zeroes
+	for (int i = 0; i < segtreesize; i++)
+		segtree[i] = 0;
+}
+
+int queryRecursive(int currInd, 
+                   int currLo, int currHi,
+                   int queryLo, int queryHi) {
+
+	if (currLo >= queryLo and currHi <= queryHi)
+		return segtree[currInd];
+
+	if (currLo > queryHi or currHi < queryLo)
+		return 0;
+
+	mid = (currLo + currHi) / 2;
+
+	return queryRecursive(currInd * 2 + 1, 
+	                      currLo, mid, 
+	                      queryLo, queryHi) +
+	       queryRecursive(currInd * 2 + 2, 
+	                      mid + 1, currHi,
+	                      queryLo, queryHi);
+
+}
+
+int query(lo, hi) {
+	return queryRecursive(0,
+	                      0, bstart, 
+	                      queryLo, queryHi);
+}
+
+void update(int ind, int val) {
+	ind = ind + bstart;
+	while (ind >= 0) {
+		segtree[ind] += val;
+		if (ind == 0) break;
+		ind = (ind - 1) / 2;
+	}
+}`
+
 	constructor(ts) {
 
 		this.ts = ts;
-
-		this.addAbout();
-		
-		this.addAboutUpdate();
-
-		this.addAboutQuery();
-
-		this.addPseudocode();
 		
 	}
 
@@ -429,16 +428,16 @@ class AboutSegtree {
 	addAbout() {
 
 		var ts = this.ts;
-		var texttowrite = aboutText.split("\n");
+		var texttowrite = AboutSegtree.aboutText.split("\n");
 
-		this.addText(whereToWrite, texttowrite[0]);
+		this.addText(whereToWrite2, texttowrite[0]);
 			
 		var sptxt1 = this.makeSpoiler("What else are segment trees used for?", ['infosp1']);
 
 		var infosp1 = document.createElement("p");
 		infosp1.setAttribute("id", "infosp1");
 		infosp1.setAttribute("style", "display: none;");
-		infosp1.innerHTML = moreAboutSTUses;
+		infosp1.innerHTML = AboutSegtree.moreAboutSTUses;
 
 		ts.appendChild(sptxt1);
 		ts.appendChild(infosp1);
@@ -451,24 +450,21 @@ class AboutSegtree {
 	addAboutUpdate() {
 
 		var ts = this.ts;
-		var texttowrite = aboutText.split("\n");
+		var texttowrite = AboutSegtree.aboutText.split("\n");
 
-		this.addText(whereToWrite, texttowrite[1]);
+		this.addText(whereToWrite2, texttowrite[1]);
 
 		var moreinfo2 = document.createElement("p");
-		var sptxt2 = this.makeSpoiler("How is the tree traversed?", ['updateinfovis', 'uexsvg', 'updinfotxt', 'extinf']);
 
 		var extinf = document.createElement("p");
-		extinf.setAttribute("style", "display: none;");
 		extinf.setAttribute("id", "extinf");
-		extinf.innerHTML = moreAboutSTUpdate;
+		extinf.innerHTML = AboutSegtree.moreAboutSTUpdate;
 
 		var updiv = document.createElement("p");
 		updiv.setAttribute("id", "updateinfovis");
 		updiv.setAttribute("class", "maindiv");
-		updiv.setAttribute("style", "display: none;");
 
-		for (var i = 1; i <= 5; i++) {
+		for (var i = 1; i <= 4; i++) {
 			var cb = document.createElement("b");
 			cb.innerHTML = "Step " + i + " ";
 			cb.setAttribute("onclick", `
@@ -479,8 +475,7 @@ class AboutSegtree {
 			updiv.appendChild(cb);
 		}
 
-		ts.appendChild(sptxt2);
-		moreinfo2.appendChild(extinf);
+		ts.appendChild(extinf);
 		moreinfo2.appendChild(updiv);
 
 		var updinfotxt = document.createElement("p");
@@ -490,10 +485,11 @@ class AboutSegtree {
 		updinfotxt.innerHTML = "";
 		moreinfo2.appendChild(updinfotxt);
 
+		console.log(ts);
 		ts.appendChild(moreinfo2);
 
-		moreinfo2.innerHTML += "<div class='maindiv'><svg id=uexsvg width='512' height='512' style='display: none;'></svg></div>";
-		this.uexst = new Segtree("uexsvg");
+		moreinfo2.innerHTML += "<div class='maindiv'><svg id=uexsvg width='256' height='256'></svg></div>";
+		this.uexst = new Segtree("uexsvg", 8);
 
 		var chr = document.createElement("hr");
 		ts.appendChild(chr);
@@ -502,26 +498,30 @@ class AboutSegtree {
 
 	addAboutQuery() {
 
+
+
 		var ts = this.ts;
-		var texttowrite = aboutText.split("\n");
-		this.addText(whereToWrite, texttowrite[2]);
+
+		var hd = document.createElement("h2");
+		hd.innerHTML = "Querying";
+		ts.appendChild(hd);
+
+		var texttowrite = AboutSegtree.aboutText.split("\n");
+		this.addText(whereToWrite2, texttowrite[2]);
 
 		var moreinfo3 = document.createElement("p");
-		var sptxt3 = this.makeSpoiler("Why this upper bound?", ['qexsvg', 'queryinfotxt']);
 
-		ts.appendChild(sptxt3);
 
 		var queryinfotxt = document.createElement("p");
 		queryinfotxt.innerHTML = "Any segment can be represented as a sequence of segments of length one. First, merge adjacent elements into segments of length two. Doing this will leave at most 2 segments of length one. Repeat the process for segments of length two (ignoring the segments of length one now), all the way up to segments of length n. This will leave at most 2 segments of each length to query.";
-		queryinfotxt.setAttribute("style", "display: none;");
 		queryinfotxt.setAttribute("id", "queryinfotxt");
 		moreinfo3.appendChild(queryinfotxt);
 
 		ts.appendChild(moreinfo3);
 
-		ts.innerHTML += "<div class='maindiv'><svg id=qexsvg width='512' height='512' style='display: none;''></svg></div>";
-		this.qexst = new Segtree("qexsvg");
-		this.qexst.query(1, 14);
+		ts.innerHTML += "<div class='maindiv'><svg id=qexsvg width='256' height='256'></svg></div>";
+		this.qexst = new Segtree("qexsvg", 8);
+		this.qexst.query(1, 6);
 
 		var chr = document.createElement("hr");
 		ts.appendChild(chr);
@@ -532,52 +532,22 @@ class AboutSegtree {
 
 		var ts = this.ts;
 
-		var cspoiler = this.makeSpoiler("Pseudocode for the segment tree", ['pseudocode', 'pseudocodecode', 'pseudocodepre']);
-
-		// var cspoiler = document.createElement("b");
-		// cspoiler.innerHTML = "Pseudocode for the segment tree";
-
-		// cspoiler.setAttribute("onclick", `
-
-		// 	if (document.getElementById('pseudocode').style.display == 'none') {
-		// 		document.getElementById('pseudocode').style.display = '';
-		// 		document.getElementById('pseudocodecode').style.display = '';
-		// 		document.getElementById('pseudocodepre').style.display = '';
-		// 	}
-		// 	else {
-		// 		document.getElementById('pseudocode').style.display = 'none';
-		// 		document.getElementById('pseudocodecode').style.display = 'none';
-		// 		document.getElementById('pseudocodepre').style.display = 'none';
-		// 	}
-
-		// 	`)
 
 		var codep = document.createElement("p");
 		var codeb = document.createElement("pre");
 		var acode = document.createElement("code");
-		acode.innerHTML = stpsuedocode;
+		acode.innerHTML = AboutSegtree.stpsuedocode;
 
 		codeb.appendChild(acode);
 		codep.appendChild(codeb);
 
-		acode.setAttribute("style", "display: none;");
-		acode.setAttribute("id", "pseudocode");
-		codeb.setAttribute("style", "display: none;");
-		codeb.setAttribute("id", "pseudocodecode");
-		codep.setAttribute("style", "display: none;");
-		codep.setAttribute("id", "pseudocodepre");
-		
-		var fp = document.createElement("p");
-		fp.appendChild(codep);
-		
-		ts.appendChild(cspoiler);
-		ts.appendChild(fp);
+		ts.appendChild(codeb);
 		ts.innerHTML += "";
 
 	}
 
 	static updopsteps(numSteps, indToUpd, valToAdd) {
-		this.uexst = new Segtree("uexsvg")
+		this.uexst = new Segtree("uexsvg", 8)
 		this.uexst.unmarkall();
 		for (var i = 0; i < this.uexst.stsize; i++)
 			this.uexst.set(i, 0);
@@ -653,13 +623,6 @@ class UserInteraction {
 
 	}
 
-	resetAll() {
-		var cp = document.getElementById(controlID);
-		cp.innerHTML = "";
-		var txt = document.getElementById(whereToWrite);
-		txt.innerHTML = "";
-	}
-
 	addText(where, what) {
 
 		var newp = document.createElement("p");
@@ -668,23 +631,12 @@ class UserInteraction {
 
 	}
 
-	setHTMLToAboutSegtree() {
-		
-		this.resetAll();
-		document.getElementById(controlID).innerHTML = "";
-
-		var ts = document.getElementById(whereToWrite);
-
-		var helper = new AboutSegtree(ts);
-
-	}
-
 	setHTMLToUpdate() {
 		
-		this.resetAll();
 		var cp = document.getElementById(controlID);
 
 		var cdiv = document.createElement("div");
+		cdiv.setAttribute("class", "controlcontainer");
 
 		var valv = document.createElement("input");
 		valv.setAttribute("type", "number");
@@ -712,10 +664,10 @@ class UserInteraction {
 
 	setHTMLToQuery() {
 		
-		this.resetAll();
 		var cp = document.getElementById(controlID);
 
 		var cdiv = document.createElement("div");
+		cdiv.setAttribute("class", "controlcontainer");
 
 		var valv = document.createElement("input");
 		valv.setAttribute("type", "number");
@@ -746,132 +698,87 @@ class UserInteraction {
 		return parseInt(v);
 	}
 
-	setoptions() {
+}
 
-		var coloroptions = [
-			["Node Fill", nodeColor],
-			["Node Border", nodeBorder],
-			["Mark Color 1", markColor],
-			["Popup Fill", popupFill],
-			["Popup Border", popupBorder]
-		]
-			
-		nodeColor = document.getElementById(coloroptions[0][0]).value;
-		nodeBorder = document.getElementById(coloroptions[1][0]).value;
-		markColor = document.getElementById(coloroptions[2][0]).value;
-		popupFill = document.getElementById(coloroptions[3][0]).value;
-		popupBorder = document.getElementById(coloroptions[4][0]).value;
+class Resizer {
 
-		var cosmeticOptions = [
-			 ["Node Size", nodeSize]
-			,["Node Border Width", nodeBorderWidth]
-			,["Popup Width", popupWidth]
-			,["Popup Height", popupHeight]
-			,["Text Size", textSize]
-		];
+	// https://htmldom.dev/create-resizable-split-views/
 
-		nodeSize = this.checkIfValid(document.getElementById(cosmeticOptions[0][0]).value, nodeSize);
-		nodeBorderWidth = this.checkIfValid(document.getElementById(cosmeticOptions[1][0]).value, nodeBorderWidth);
-		popupWidth = this.checkIfValid(document.getElementById(cosmeticOptions[2][0]).value, popupWidth);
-		popupHeight = this.checkIfValid(document.getElementById(cosmeticOptions[3][0]).value, popupHeight);
-		textSize = this.checkIfValid(document.getElementById(cosmeticOptions[4][0]).value, textSize);
-		textOffset = textSize / 3;
-		
-		this.segtree.redraw();
+	static x;
+	static y;
+	static lwidth;
+	static fv;
+
+	static c;
+	static l;
+	static r;
+
+	static resize(e) {
+
+		var dx = e.clientX - Resizer.x;
+		var dy = e.clientY - Resizer.y;
+
+		var nlw = (Resizer.lwidth + dx) * 100 / Resizer.c.parentNode.getBoundingClientRect().width;
+		Resizer.l.style.width = `${nlw}%`;
 
 	}
 
-	setHTMLToSettings() {
+	static stopresize(e) {
 
-		this.resetAll();
+		Resizer.l.style.removeProperty('user-select');
+		Resizer.l.style.removeProperty('pointer-events');
+		Resizer.r.style.removeProperty('user-select');
+		Resizer.r.style.removeProperty('pointer-events');
 
-		var cp = document.getElementById(controlID);
-		// cp.setAttribute("class", "maindiv");
-
-		var dcolors = document.createElement("div");
-		dcolors.setAttribute("class", "uidiv");
-
-		var coloroptions = [
-			 ["Node Fill", nodeColor]
-			,["Node Border", nodeBorder]
-			,["Mark Color 1", markColor]
-			,["Popup Fill", popupFill]
-			,["Popup Border", popupBorder]
-		]
-
-		for (var i = 0; i < coloroptions.length; i++) {
-			var tdiv = document.createElement("div");
-			tdiv.setAttribute("class", "regdiv");
-			var wone = document.createElement("label");
-			wone.innerHTML = coloroptions[i][0];
-			var cin = document.createElement("input");
-			cin.setAttribute("type", "color");
-			cin.setAttribute("value", coloroptions[i][1]);
-			cin.setAttribute("placeholder", coloroptions[i][0]);
-			cin.setAttribute("id", coloroptions[i][0]);
-			cin.setAttribute("class", "smallinput");
-			tdiv.appendChild(wone);
-			tdiv.appendChild(cin);
-			dcolors.appendChild(tdiv);
-		}
-
-		var dcosmetic = document.createElement("div");
-		dcosmetic.setAttribute("class", "uidiv");
-
-		var cosmeticOptions = [
-			 ["Node Size", nodeSize]
-			,["Node Border Width", nodeBorderWidth]
-			,["Popup Width", popupWidth]
-			,["Popup Height", popupHeight]
-			,["Text Size", textSize]
-		];
-
-		for (var i = 0; i < cosmeticOptions.length; i++) {
-			var tdiv = document.createElement("div");
-			tdiv.setAttribute("class", "regdiv");
-			var wone = document.createElement("label");
-			wone.innerHTML = cosmeticOptions[i][0];
-			var cin = document.createElement("input");
-			cin.setAttribute("type", "number");
-			cin.setAttribute("value", cosmeticOptions[i][1]);
-			cin.setAttribute("placeholder", cosmeticOptions[i][0]);
-			cin.setAttribute("id", cosmeticOptions[i][0]);
-			cin.setAttribute("class", "smallinput");
-			tdiv.appendChild(wone);
-			tdiv.appendChild(cin);
-			dcosmetic.appendChild(tdiv);
-		}
-
-		var odiv = document.createElement("div");
-
-		var butt = document.createElement("button");
-		butt.innerHTML = "Save";
-		butt.setAttribute("onclick", "interaction.setoptions()");
-		odiv.appendChild(butt);
-
-		cp.appendChild(dcolors);
-		cp.appendChild(dcosmetic);
-		cp.appendChild(odiv);
-
-		cp.innerHTML += "";
+		document.removeEventListener('mousemove', Resizer.resize);
+		document.removeEventListener('mouseup', Resizer.stopresize);
 	}
 
+	static sclick(e) {
+
+		Resizer.x = e.clientX;
+		Resizer.y = e.clientY;
+		Resizer.lwidth = Resizer.l.getBoundingClientRect().width;
+
+		Resizer.l.style.userSelect = 'none';
+		Resizer.l.style.pointerEvents = 'none';
+		Resizer.r.style.userSelect = 'none';
+		Resizer.r.style.pointerEvents = 'none';
+	
+
+		document.addEventListener('mouseup', Resizer.stopresize);
+		document.addEventListener('mousemove', Resizer.resize);
+
+	}
+
+	static sresize() {
+
+		Resizer.c = document.getElementById('resizer');
+		Resizer.l = Resizer.c.previousElementSibling;
+		Resizer.r = Resizer.c.nextElementSibling;
+
+		Resizer.lwidth = Resizer.l.getBoundingClientRect().width;
+		document.getElementById('resizer').addEventListener("mousedown", Resizer.sclick);
+	}
 }
 
 var interaction;
+var helpabout;
 
-function switchStuff() {
-	var chosen = document.getElementById(selectionBar).value;
-	if (chosen == updateOption) interaction.setHTMLToUpdate();
-	if (chosen == aboutOption) interaction.setHTMLToAboutSegtree();
-	if (chosen == queryOption) interaction.setHTMLToQuery();
-	if (chosen == settingsOption) interaction.setHTMLToSettings();
-}
 
 function initall() {
 
 	interaction = new UserInteraction( new Segtree(stVisID) );
-	switchStuff();
+	helpabout = new AboutSegtree(document.getElementById(whereToWrite2));
+
+	// interaction.createAboutSegtree();
+	Resizer.sresize();
+	interaction.setHTMLToQuery();
+	interaction.setHTMLToUpdate();
+
+	helpabout.addAboutUpdate();
+	helpabout.addAboutQuery();
+	// helpabout.addPseudocode();
 
 }
 

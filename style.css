@@ -950,7 +950,7 @@ textarea {
 	border: 1px solid #bbb;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
-	display: block;
+	/*display: block;*/
 	padding: 0.7em;
 	/*width: 100%;*/
 }
@@ -4367,15 +4367,32 @@ select {
 	font-size: 0.825rem;
 }
 
+.holdall {
+	display: flex;
+}
+
+svg {
+	/*border: 1px black solid;*/
+	margin-top: 10px;
+}
+
 div {
 	/*margin: 15px 10px 10px 10px;*/
+	display: inline;
+	/*float: left;*/
 	margin: 5px 5px 5px 5px;
-	display: block;
+	/*width: 100%;*/
+	text-align: center;
+}
+
+.controlcontainer {
+	overflow: auto;
+	white-space: nowrap;
 }
 
 button, input, label {
-	display: inline-block;
-	float: left;
+	display: inline;
+	/*float: left;*/
 	margin: 3px 3px 3px 3px;
 }
 
@@ -4386,14 +4403,16 @@ p, pre {
 }
 
 .uidiv {
-	display: inline-block;
-	float: left;
+	display: inline-grid;
+	/*float: left;*/
 	margin: 3px 3px 3px 3px;
+	text-align: center;
 }
 
 .maindiv {
-	width: 99%;
-	margin: auto;
+	width: 100%;
+	margin: 0 auto;
+	display: inline-block;
 	text-align: center;
 }
 
@@ -4412,7 +4431,6 @@ p, pre {
 }
 
 .site-header {
-	/*text-align: center;*/
 	color: #f0efed;
 }
 
@@ -4420,3 +4438,38 @@ hr {
 	clear: both;
 	margin-top: 20px;
 }
+
+.sdiv, .rres {
+	overflow-x: scroll;
+	overflow-y: scroll;
+	width: 60%;
+	height: 95vh;
+	float: left;
+	display: table-row;
+	text-align: center;
+	margin: 0 auto;
+}
+
+.rres {
+	
+	flex: 1 1 0%;
+}
+
+.resizer {
+	float: left;
+	/*display: table-row;*/
+	width: 5px;
+	background: black;
+	height: auto;
+	cursor: col-resize;
+}
+
+code, pre {
+	display: inline-block;
+	overflow: auto;
+}
+
+hr {
+	margin-bottom: 0px;
+}
+

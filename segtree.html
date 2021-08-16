@@ -16,40 +16,42 @@
 
 <body onload="initall()">
 
-	<!-- <header class="site-header">Segment Tree</header> -->
+	<div class="holdall">
 
-	<div>
-		<div class="maindiv">
-			<svg id=stvis width="512" height="512"></svg>
-		</div>
-		
-		<div class="regdiv">
-			<div class="regdiv">
-				<div class="uidiv">
-					Select: 
-				</div>
-				<div class="uidiv">
-					<select name="Information" onchange="switchStuff()" id="selectionBar">
-						
-						<option value="update">Point Update</option>
-						<option value="query">Range Query</option>
-						<option value="about">About</option>
-						<option value="settings">Settings</option>
-					</select>
-				</div>
+		<div class="sdiv" id="lsdiv">
+			<div class="maindiv">
+				<svg id=stvis width="512" height="512"></svg>
 			</div>
-
-			<div class="uidiv">
-				<div id="outputText">
-					
-				</div>
+			<div class="maindiv" id="outputText">
+				
 			</div>
-		</div>
-
-		<div id="controls" class="regdiv">
+			<div id="controls" class="uidiv">
+				
+			</div>
+			
 			
 		</div>
+		<div class="resizer" id="resizer"></div>
+		<div class="rres" id="outputText2">
+			<div>
+				<h2>
+					About 
+				</h2>
+				<p>
+					You are given an array, and you should be able to modify elements and find the sum of a range in the array. Segment trees accomplish this in logarithmic time per operation by breaking the array into segments of size 1, 2, 4, 8, etc.
+				</p>
+				<p>
+					The segment tree can also be extended to support a wide variety of operations, such as range updates, multiple different types of update operations (add, set, multiply, all at the same time), and higher-dimensional segment trees.
+				</p>
+				
+				<hr>
 
+				<h2>
+					Updating
+				</h2>
+			</div>
+
+		</div>
 
 
 	</div>
