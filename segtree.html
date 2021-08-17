@@ -25,9 +25,21 @@
 			<div class="maindiv" id="outputText">
 				
 			</div>
+			
 			<div id="controls" class="uidiv">
 				
+				<div class="controlcontainer">
+					<input type="number" id="linput" placeholder="Left bound of query">
+					<input type="number" id="rinput" placeholder="Right bound of query">
+					<button onclick="UserInteraction.queryOperation()">Go</button>
+				</div>
+				<div class="controlcontainer">
+					<input type="number" id="valueInput" placeholder="Value to add">
+					<input type="number" id="indexInput" placeholder="Index to add to">
+					<button onclick="UserInteraction.updateOperation()">Go</button>
+				</div>
 			</div>
+			
 			
 			
 		</div>
@@ -49,6 +61,44 @@
 				<h2>
 					Updating
 				</h2>
+
+				<p>
+					Update operations: there are at most lg(N) nodes that cover one index. Traversing the tree from the element at the bottom  up to the top and updating each node along the way will be enough to update.
+				</p>
+
+				<p>
+					Start at the bottom by adding a constant to the index being added to. To find the parent of a node with index i, take (i - 1) / 2, rounding down. Repeat until node 0 is reached. In this example, 1 is added to the node with index 3.
+				</p>
+
+				<p class="maindiv">
+					<b onclick="UserInteraction.updopsteps(1, 3, 1)">Step 1</b>
+					<b onclick="UserInteraction.updopsteps(2, 3, 1)">Step 2</b>
+					<b onclick="UserInteraction.updopsteps(3, 3, 1)">Step 3</b>
+					<b onclick="UserInteraction.updopsteps(4, 3, 1)">Step 4</b>
+				</p>
+
+				<p id="updinfotxt" class="maindiv"></p>
+
+				<div class='maindiv'><svg id=uexsvg width='256' height='256'></svg></div>
+
+				<hr>
+
+				<h2>
+					Querying
+				</h2>
+
+				<p>
+					Query operations: because of the way the tree is organized, each range is split into at most 2 segments of each length, so at most 2 * lg(N) nodes are queried.
+				</p>
+
+				<p>
+					Any segment can be represented as a sequence of segments of length one. First, merge adjacent elements into segments of length two. Doing this will leave at most 2 segments of length one. Repeat the process for segments of length two (ignoring the segments of length one now), all the way up to segments of length n. This will leave at most 2 segments of each length to query.
+				</p>
+
+				<div class='maindiv'><svg id=qexsvg width='256' height='256'></svg></div>
+
+
+
 			</div>
 
 		</div>
