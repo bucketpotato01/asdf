@@ -20,14 +20,8 @@ const valInputID = "valueInput";   // ID of the value input
 const indInputID = "indexInput";   // ID of the index input
 const lInputID = "linput";
 const rInputID = "rinput";
-const controlID = "controls";      // ID of the control panel
 const whereToWrite = "outputText"; // ID of the div to put text onto
-const whereToWrite2 = "outputText2";
-const selectionBar = "selectionBar";
-const aboutOption = "about";
-const queryOption = "query";
-const updateOption = "update";
-const settingsOption = "settings";
+
 
 const infoIDPrefix = "onclickInfo";
 const popupTextSize = 'x-small';
@@ -329,75 +323,56 @@ class Segtree {
 	}
 }
 
-class AboutSegtree {
+class UserInteraction {
 
-	static aboutText = `You are given an array, and you should be able to modify elements and find the sum of a range in the array. Segment trees accomplish this in logarithmic time per operation by breaking the array into segments of size 1, 2, 4, 8, etc.
-	Update operations: there are at most lg(N) nodes that cover one index. Traversing the tree from the element at the bottom  up to the top and updating each node along the way will be enough to update.
-	Query operations: because of the way the tree is organized, each range is split into at most 2 segments of each length, so at most 2 * lg(N) nodes are queried.
-	About the visualization: for update operations, the nodes that are modified at each step are highlighted. For query operations, all nodes in the range queried are highlighted, but only the nodes that are added to the total are highlighted a darker color.`;
+	static segtree;
 
-	static moreAboutSTUses = `The segment tree can also be extended to support a wide variety of operations, such as range updates, multiple different types of update operations (add, set, multiply, all at the same time), and higher-dimensional segment trees.`;
-	static moreAboutSTUpdate = `Start at the bottom by adding a constant to the index being added to. To find the parent of a node with index i, take (i - 1) / 2, rounding down. Repeat until node 0 is reached. In this example, 1 is added to the node with index 3.`;
-	static stpsuedocode = `// roguh C++ code for the ST
-
-void build(int arraySize) {
-
-	bstart = 1;
-	while (bstart < arraySize)
-		bstart = bstart * 2;
-	
-
-	segtreesize = bstart * 2 - 1;
-	bstart = bstart - 1;
-
-	// fill the segtree with zeroes
-	for (int i = 0; i < segtreesize; i++)
-		segtree[i] = 0;
-}
-
-int queryRecursive(int currInd, 
-                   int currLo, int currHi,
-                   int queryLo, int queryHi) {
-
-	if (currLo >= queryLo and currHi <= queryHi)
-		return segtree[currInd];
-
-	if (currLo > queryHi or currHi < queryLo)
-		return 0;
-
-	mid = (currLo + currHi) / 2;
-
-	return queryRecursive(currInd * 2 + 1, 
-	                      currLo, mid, 
-	                      queryLo, queryHi) +
-	       queryRecursive(currInd * 2 + 2, 
-	                      mid + 1, currHi,
-	                      queryLo, queryHi);
-
-}
-
-int query(lo, hi) {
-	return queryRecursive(0,
-	                      0, bstart, 
-	                      queryLo, queryHi);
-}
-
-void update(int ind, int val) {
-	ind = ind + bstart;
-	while (ind >= 0) {
-		segtree[ind] += val;
-		if (ind == 0) break;
-		ind = (ind - 1) / 2;
+	static tellUser(message) {
+		document.getElementById(whereToWrite).innerHTML = message;
 	}
-}`
 
-	constructor(ts) {
-
-		this.ts = ts;
+	static updateOperation() {
 		
+		UserInteraction.tellUser("");
+		var val = parseInt(document.getElementById(valInputID).value);
+		var ind = parseInt(document.getElementById(indInputID).value);
+		
+		if (isNaN(val) || isNaN(ind)) return;
+		if (ind >= UserInteraction.segtree.arrSize || ind < 0) {
+			UserInteraction.tellUser("Index out of bounds");
+			return;
+		}
+		UserInteraction.segtree.upd(ind, val);
+
 	}
 
-	addText(where, what) {
+	static queryOperation() {
+
+		var l = parseInt(document.getElementById(lInputID).value);
+		var r = parseInt(document.getElementById(rInputID).value);
+		
+		if (isNaN(l) || isNaN(r)) return;
+		if (l >= UserInteraction.segtree.arrSize || 
+			r >= UserInteraction.segtree.arrSize || 
+			l < 0 || r < 0) {
+			UserInteraction.tellUser("Index out of bounds");
+			return;
+		}
+
+		if (l > r) {
+			UserInteraction.tellUser("Left index should be less than right index.");
+			return;
+		}
+
+		UserInteraction.segtree.unmarkall();
+
+		var res = UserInteraction.segtree.query(l, r);
+
+		UserInteraction.tellUser("Result of query is " + res);
+
+	}
+
+	static addText(where, what) {
 
 		var newp = document.createElement("p");
 		newp.innerHTML = what;
@@ -405,145 +380,9 @@ void update(int ind, int val) {
 
 	}
 
-	makeSpoiler(sptxt, tospoiler) {
-		var res = document.createElement("b");
-		res.innerHTML = sptxt;
-
-		var v1 = "";
-		var v2 = "";
-		for (var j = 0; j < tospoiler.length; j++) {
-			var i = tospoiler[j];
-			v1 = v1 + `document.getElementById('${i}').style.display = '';`;
-			v2 = v2 + `document.getElementById('${i}').style.display = 'none';`;
-		}
-		var finif = `if (document.getElementById('${tospoiler[0]}').style.display == 'none') {${v1}} else {${v2}}`;
-
-		res.setAttribute("onclick", finif);
-		var fr = document.createElement("p");
-		fr.appendChild(res);
-		return fr;
-
-	}
-
-	addAbout() {
-
-		var ts = this.ts;
-		var texttowrite = AboutSegtree.aboutText.split("\n");
-
-		this.addText(whereToWrite2, texttowrite[0]);
-			
-		var sptxt1 = this.makeSpoiler("What else are segment trees used for?", ['infosp1']);
-
-		var infosp1 = document.createElement("p");
-		infosp1.setAttribute("id", "infosp1");
-		infosp1.setAttribute("style", "display: none;");
-		infosp1.innerHTML = AboutSegtree.moreAboutSTUses;
-
-		ts.appendChild(sptxt1);
-		ts.appendChild(infosp1);
-
-		var chr = document.createElement("hr");
-		ts.appendChild(chr);
-
-	}
-
-	addAboutUpdate() {
-
-		var ts = this.ts;
-		var texttowrite = AboutSegtree.aboutText.split("\n");
-
-		this.addText(whereToWrite2, texttowrite[1]);
-
-		var moreinfo2 = document.createElement("p");
-
-		var extinf = document.createElement("p");
-		extinf.setAttribute("id", "extinf");
-		extinf.innerHTML = AboutSegtree.moreAboutSTUpdate;
-
-		var updiv = document.createElement("p");
-		updiv.setAttribute("id", "updateinfovis");
-		updiv.setAttribute("class", "maindiv");
-
-		for (var i = 1; i <= 4; i++) {
-			var cb = document.createElement("b");
-			cb.innerHTML = "Step " + i + " ";
-			cb.setAttribute("onclick", `
-
-				AboutSegtree.updopsteps(${i}, 3, 1);
-
-				`)
-			updiv.appendChild(cb);
-		}
-
-		ts.appendChild(extinf);
-		moreinfo2.appendChild(updiv);
-
-		var updinfotxt = document.createElement("p");
-		updinfotxt.setAttribute("class", "maindiv");
-		updinfotxt.setAttribute("id", "updinfotxt");
-		
-		updinfotxt.innerHTML = "";
-		moreinfo2.appendChild(updinfotxt);
-
-		console.log(ts);
-		ts.appendChild(moreinfo2);
-
-		moreinfo2.innerHTML += "<div class='maindiv'><svg id=uexsvg width='256' height='256'></svg></div>";
-		this.uexst = new Segtree("uexsvg", 8);
-
-		var chr = document.createElement("hr");
-		ts.appendChild(chr);
-
-	}
-
-	addAboutQuery() {
-
-
-
-		var ts = this.ts;
-
-		var hd = document.createElement("h2");
-		hd.innerHTML = "Querying";
-		ts.appendChild(hd);
-
-		var texttowrite = AboutSegtree.aboutText.split("\n");
-		this.addText(whereToWrite2, texttowrite[2]);
-
-		var moreinfo3 = document.createElement("p");
-
-
-		var queryinfotxt = document.createElement("p");
-		queryinfotxt.innerHTML = "Any segment can be represented as a sequence of segments of length one. First, merge adjacent elements into segments of length two. Doing this will leave at most 2 segments of length one. Repeat the process for segments of length two (ignoring the segments of length one now), all the way up to segments of length n. This will leave at most 2 segments of each length to query.";
-		queryinfotxt.setAttribute("id", "queryinfotxt");
-		moreinfo3.appendChild(queryinfotxt);
-
-		ts.appendChild(moreinfo3);
-
-		ts.innerHTML += "<div class='maindiv'><svg id=qexsvg width='256' height='256'></svg></div>";
-		this.qexst = new Segtree("qexsvg", 8);
-		this.qexst.query(1, 6);
-
-		var chr = document.createElement("hr");
-		ts.appendChild(chr);
-
-	}
-
-	addPseudocode() {
-
-		var ts = this.ts;
-
-
-		var codep = document.createElement("p");
-		var codeb = document.createElement("pre");
-		var acode = document.createElement("code");
-		acode.innerHTML = AboutSegtree.stpsuedocode;
-
-		codeb.appendChild(acode);
-		codep.appendChild(codeb);
-
-		ts.appendChild(codeb);
-		ts.innerHTML += "";
-
+	static checkIfValid(v, ov) {
+		if (isNaN(parseInt(v))) return ov;
+		return parseInt(v);
 	}
 
 	static updopsteps(numSteps, indToUpd, valToAdd) {
@@ -570,132 +409,6 @@ void update(int ind, int val) {
 		}
 
 
-	}
-
-}
-
-class UserInteraction {
-
-	constructor(ms) {
-		this.segtree = ms;
-	}
-
-	tellUser(message) {
-		document.getElementById(whereToWrite).innerHTML = message;
-	}
-
-	updateOperation() {
-		
-		this.tellUser("");
-		var val = parseInt(document.getElementById(valInputID).value);
-		var ind = parseInt(document.getElementById(indInputID).value);
-		
-		if (isNaN(val) || isNaN(ind)) return;
-		if (ind >= this.segtree.arrSize || ind < 0) {
-			this.tellUser("Index out of bounds");
-			return;
-		}
-		this.segtree.upd(ind, val);
-
-	}
-
-	queryOperation() {
-
-		var l = parseInt(document.getElementById(lInputID).value);
-		var r = parseInt(document.getElementById(rInputID).value);
-		
-		if (isNaN(l) || isNaN(r)) return;
-		if (l >= this.segtree.arrSize || r >= this.segtree.arrSize || l < 0 || r < 0) {
-			this.tellUser("Index out of bounds");
-			return;
-		}
-
-		if (l > r) {
-			this.tellUser("Left index should be less than right index.");
-			return;
-		}
-
-		this.segtree.unmarkall();
-
-		var res = this.segtree.query(l, r);
-
-		this.tellUser("Result of query is " + res);
-
-	}
-
-	addText(where, what) {
-
-		var newp = document.createElement("p");
-		newp.innerHTML = what;
-		document.getElementById(where).appendChild(newp);
-
-	}
-
-	setHTMLToUpdate() {
-		
-		var cp = document.getElementById(controlID);
-
-		var cdiv = document.createElement("div");
-		cdiv.setAttribute("class", "controlcontainer");
-
-		var valv = document.createElement("input");
-		valv.setAttribute("type", "number");
-		valv.setAttribute("id", valInputID);
-		valv.setAttribute("placeholder", "Value to add");
-
-		cdiv.appendChild(valv);
-
-		var indv = document.createElement("input");
-		indv.setAttribute("type", "number");
-		indv.setAttribute("id", indInputID);
-		indv.setAttribute("placeholder", "Index to add to");
-
-		cdiv.appendChild(indv);
-
-		var button = document.createElement("button");
-		button.setAttribute("onclick", "interaction.updateOperation()");
-		button.innerHTML = "Go";
-
-		cdiv.appendChild(button);
-
-		cp.appendChild(cdiv);
-
-	}
-
-	setHTMLToQuery() {
-		
-		var cp = document.getElementById(controlID);
-
-		var cdiv = document.createElement("div");
-		cdiv.setAttribute("class", "controlcontainer");
-
-		var valv = document.createElement("input");
-		valv.setAttribute("type", "number");
-		valv.setAttribute("id", lInputID);
-		valv.setAttribute("placeholder", "Left bound of query");
-
-		cdiv.appendChild(valv);
-
-		var indv = document.createElement("input");
-		indv.setAttribute("type", "number");
-		indv.setAttribute("id", rInputID);
-		indv.setAttribute("placeholder", "Right bound of query");
-
-		cdiv.appendChild(indv);
-
-		var button = document.createElement("button");
-		button.setAttribute("onclick", "interaction.queryOperation()");
-		button.innerHTML = "Go";
-
-		cdiv.appendChild(button);
-
-		cp.appendChild(cdiv);
-
-	}
-
-	checkIfValid(v, ov) {
-		if (isNaN(parseInt(v))) return ov;
-		return parseInt(v);
 	}
 
 }
@@ -765,20 +478,15 @@ class Resizer {
 var interaction;
 var helpabout;
 
-
 function initall() {
 
-	interaction = new UserInteraction( new Segtree(stVisID) );
-	helpabout = new AboutSegtree(document.getElementById(whereToWrite2));
+	UserInteraction.segtree = new Segtree(stVisID);
 
-	// interaction.createAboutSegtree();
 	Resizer.sresize();
-	interaction.setHTMLToQuery();
-	interaction.setHTMLToUpdate();
 
-	helpabout.addAboutUpdate();
-	helpabout.addAboutQuery();
-	// helpabout.addPseudocode();
+	var uexst = new Segtree("uexsvg", 8);
+	var qexst = new Segtree("qexsvg", 8);
+	qexst.query(1, 6);
 
 }
 
