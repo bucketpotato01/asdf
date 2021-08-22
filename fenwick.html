@@ -16,38 +16,115 @@
 
 <body onload="initall()">
 
-	<!-- <header class="site-header">Fenwick Tree</header> -->
+	<div class="holdall">
 
-	<div>
-		<div class="maindiv">
-			<svg id=bitvis width="512" height="512"></svg>
-		</div>
-		
-		<div class="regdiv">
-			<div class="regdiv">
-				<div class="uidiv">
-					Select: 
+		<div class="sdiv" id="lsdiv">
+			<div class="maindiv">
+				<svg id=bitvis width="512" height="512"></svg>
+			</div>
+			<div class="maindiv" id="outputText">
+				
+			</div>
+			
+			<div id="controls" class="uidiv">
+				
+				<div class="controlcontainer">
+					<input type="number" id="valueInput" placeholder="Value to add">
+					<input type="number" id="indexInputq" placeholder="Index to add to">
+					<button onclick="UserInteraction.updateOperation()">Go</button>
 				</div>
-				<div class="uidiv">
-					<select name="Information" onchange="switchStuff()" id="selectionBar">
-
-						<option value="update">Point Update</option>
-						<option value="query">Prefix Query</option>
-						<option value="about">About</option>
-						<option value="settings">Settings</option>
-						
-					</select>
-				</div>
-				<div class="uidiv">
-					<div id="outputText"></div>
+				<div class="controlcontainer">
+					<input type="number" id="indexInput" placeholder="Upper bound of query">
+					<button onclick="UserInteraction.queryOperation()">Go</button>
 				</div>
 			</div>
-		</div>
-
-		<div id="controls" class="regdiv">
+			
+			
 			
 		</div>
+		<div class="resizer" id="resizer"></div>
+		<div class="rres" id="outputText2">
+			<div>
+				<h2>
+					About 
+				</h2>
+				<p>
+					You are given an array, and you should be able to modify elements and find the sum of a range in the array. Fenwick trees, or Binary Indexed trees (BIT) accomplish this in logarithmic time per operation.
+				</p>
+				<p>
+					Each index is assigned a range to cover based on its lowest set bit (LSB). For example, The LSB(10110) (22 in binary) would be 00010 (2 in binary), so index 22 would cover a range of size 2: indicies [21, 22].
+				</p>
+				
+				<hr>
 
+				<h2>
+					Updating
+				</h2>
+
+				<p>
+					The indicies of the nodes that cover any given index must satisfy two conditions. First, it must be greater than or equal to that index. Second, j - LSB(j) must be less than or equal to i. Listing out the nodes that satisfy this condition will give a pattern. For this example, the index 85 (1010101 in binary) is used.
+				</p>
+
+				<table>
+					<tr>
+						<th>1010101</th>
+						<th>1010110</th>
+						<th>1011000</th>
+					</tr>
+					<tr>
+						<th>1100000</th>
+						<th>10000000</th>
+						<th>100000000</th>
+					</tr>
+					<tr>
+						<th>1000000000</th>
+						<th>10000000000</th>
+						<th>100000000000</th>
+					</tr>
+				</table>
+
+				<p>
+					All of these numbers are greater or equal than 1010101, and when their last bits are subtracted, they result in a number less than 1010101. There is a simple process to iterate through these numbers:
+				</p>
+
+				<p>
+					Start at the index being updated. Add the value, then go add the lowest set bit of the index to the current index (for example, the lowest set bit of 9, 1001, would be 1). Repeat until the index is greater than the array size.
+				</p>
+
+				<p class="maindiv">
+					<b onclick="UserInteraction.updopsteps(1, 3, 1)">Step 1</b>
+					<b onclick="UserInteraction.updopsteps(2, 3, 1)">Step 2</b>
+					<b onclick="UserInteraction.updopsteps(3, 3, 1)">Step 3</b>
+					<b onclick="UserInteraction.updopsteps(4, 3, 1)">Step 4</b>
+				</p>
+
+				<p id="updinfotxt" class="maindiv"></p>
+
+				<div class='maindiv'><svg id=uexsvg width='256' height='256'></svg></div>
+
+				<hr>
+
+				<h2>
+					Querying
+				</h2>
+
+				<p>
+					In this visualization, each node points to the greatest index less than it that it doesn't cover. For example, node 10 covers [9, 10], so it would point to node 8. Node 24 covers [17, 24], so it points to 16.
+				</p>
+
+				<p>
+					To take the sum of some prefix, just iterate until you reach the root: node zero. If the array is of size N, this will take at most lg(N) iterations: to get a better idea of why this is true, look at the structure of the tree. You are always going to the right, so you iterate through a node of each size (1, 2, 4, 8, etc.) at most once each. The sizes of these nodes must sum to N, so at most lg(N) are iterated through.
+				</p>
+
+				<p>
+					In this small example, the path from node 7 to node 0 is highlighted.
+				</p>
+
+				<div class='maindiv'><svg id=qexsvg width='256' height='256'></svg></div>
+
+			</div>
+
+		</div>
 
 
 	</div>
