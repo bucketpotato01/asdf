@@ -49,10 +49,13 @@
 					About 
 				</h2>
 				<p>
-					You are given an array, and you should be able to modify elements and find the sum of a range in the array. Fenwick trees, or Binary Indexed trees (BIT) accomplish this in logarithmic time per operation.
+					You are given an array, and you should be able to modify elements and find the sum of a range in the array. Fenwick trees, or Binary Indexed trees (BIT) accomplish this in logarithmic time per operation, and can be modified to support a variety of different operations.
 				</p>
 				<p>
-					Each index is assigned a range to cover based on its lowest set bit (LSB). For example, The LSB(10110) (22 in binary) would be 00010 (2 in binary), so index 22 would cover a range of size 2: indicies [21, 22].
+					Each index is assigned a range to cover based on its lowest set bit (LSB): the rightmost 1 in its binary representation.
+				</p>
+				<p>
+					For example, The LSB(10110) (22 in binary) would be 00010 (2 in binary), so index 22 would cover a range of size 2: indicies [21, 22].
 				</p>
 				
 				<hr>
@@ -88,7 +91,7 @@
 				</p>
 
 				<p>
-					Start at the index being updated. Add the value, then go add the lowest set bit of the index to the current index (for example, the lowest set bit of 9, 1001, would be 1). Repeat until the index is greater than the array size.
+					Start at the index being updated. Update this node, then add the lowest set bit of the index to the current index (for example, the lowest set bit of 9, 1001, would be 1). Repeat until the index is greater than the array size. Click on each step to see the process.
 				</p>
 
 				<p class="maindiv">
@@ -113,7 +116,11 @@
 				</p>
 
 				<p>
-					To take the sum of some prefix, just iterate until you reach the root: node zero. If the array is of size N, this will take at most lg(N) iterations: to get a better idea of why this is true, look at the structure of the tree. You are always going to the right, so you iterate through a node of each size (1, 2, 4, 8, etc.) at most once each. The sizes of these nodes must sum to N, so at most lg(N) are iterated through.
+					To take the sum of some prefix, just iterate until you reach the root: node zero. If the array is of size N, this will take at most lg(N) iterations: to get a better idea of why this is true, look at the structure of the tree.
+				</p>
+
+				<p>
+					You are always going to the right, so you iterate through a node of each size (1, 2, 4, 8, etc.) at most once each. The sizes of these nodes must sum to N, so at most lg(N) are iterated through.
 				</p>
 
 				<p>
