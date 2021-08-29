@@ -4477,3 +4477,44 @@ table {
 	margin: 10px 10px 10px 10px;
 }
 
+.indexcard {
+	box-shadow: 0 0 8px #ccc;
+	box-sizing: border-box;
+	width: 40%;
+	display: inline-block;
+	cursor: pointer;
+	margin: 2% 2% 2% 2%;
+	/*position: relative;*/
+}
+
+img {
+
+	max-height: 50%;
+
+}
+
+.indexdiv {
+	display: block;
+}
+
+h2 {
+	margin-top: 10px;
+}
+
+.cardp {
+	margin: 5% 5% 5% 5%;
+}
+
+h1 {
+	margin-bottom: 0;
+}
+a {
+	text-align: center;
+}
+
+.indexp {
+	
+	margin: 5% 5% 5% 5%;
+	margin-top: 0;
+}
+
